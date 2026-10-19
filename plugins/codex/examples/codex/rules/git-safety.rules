@@ -1,0 +1,24 @@
+# Keep prefixes narrow. Other subcommands and their options need separate review.
+prefix_rule(
+    pattern = ["git", ["add", "status"]],
+    decision = "allow",
+    justification = "Stage authorized changes or inspect the working tree.",
+    match = ["git add -A", "git status --short"],
+    not_match = ["git commit --amend", "git switch --discard-changes main", "git fetch origin main"],
+)
+
+prefix_rule(
+    pattern = ["gh", ["issue", "pr"], ["view", "list", "diff", "checks", "status"]],
+    decision = "allow",
+    justification = "Read issue and pull request information.",
+    match = ["gh issue view 1", "gh pr diff 1", "gh pr checks 1", "gh pr list"],
+    not_match = ["gh issue create", "gh pr merge 1", "gh pr edit 1", "gh api repos/example/project"],
+)
+
+prefix_rule(
+    pattern = ["gh", "run", ["view", "list", "watch"]],
+    decision = "allow",
+    justification = "Read workflow runs and wait for their results.",
+    match = ["gh run view 1", "gh run list", "gh run watch 1 --exit-status"],
+    not_match = ["gh run cancel 1", "gh run delete 1", "gh workflow run checks.yml"],
+)

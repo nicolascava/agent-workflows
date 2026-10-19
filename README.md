@@ -7,6 +7,7 @@ The `git-flow` plugin provides Git delivery workflows.
 The `issues` plugin provides issue intake, planning, and acceptance review.
 The `audits` plugin provides repository assessments and design reviews.
 The `web-qa` plugin provides interface implementation, browser checks, and recordings.
+The `codex` plugin provides optional task delegation through the Codex CLI.
 Other plugins are coming soon.
 
 | Plugin | Purpose | Status |
@@ -16,7 +17,7 @@ Other plugins are coming soon.
 | `issues` | Issue planning, creation, and repository-bound tracking. | available |
 | `audits` | Read-only engineering audits with scoped evidence and findings. | available |
 | `web-qa` | Interface design, visual review, and web quality assurance. | available |
-| `codex` | Opt-in Codex CLI integration. | coming soon |
+| `codex` | Opt-in Codex CLI integration. | available |
 | `specialists` | Specialist agents for engineering advice and review. | coming soon |
 
 After publication, run these commands in Claude Code:
@@ -28,10 +29,11 @@ After publication, run these commands in Claude Code:
 /plugin install issues@agent-workflows
 /plugin install audits@agent-workflows
 /plugin install web-qa@agent-workflows
+/plugin install codex@agent-workflows
 ```
 
 Requirements: Claude Code, git, gh, bun, and jq.
-The `codex` plugin also requires the Codex CLI.
+The `codex` plugin also requires the Codex CLI installed and signed in with ChatGPT.
 
 Plugin skills use namespaced commands, such as `/core:tdd`.
 Core skills: `tdd`, `debug`, `condense`, `verify`, `review`,
@@ -91,6 +93,13 @@ Baseline updates require the user's request. See the
 CI setup uses discovered commands and pinned checks-only templates. Workflow writes
 require a path and full content preview. Optional scanners retain their upstream
 licenses and provenance in the [CI guide](plugins/web-qa/docs/ci-checks.md).
+
+Codex skills: `codex`. Use `/codex:codex` for bounded delegation.
+The default is read-only. Explicit `--write` disables the filesystem sandbox.
+Pace output is advisory. Provider examples are optional and copied by hand;
+installing this Claude plugin does not configure Codex. See the
+[Codex setup guide](plugins/codex/docs/codex-setup.md) for sign-in, settings,
+command rules, and helper limits.
 
 ## Hooks
 

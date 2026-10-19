@@ -1,0 +1,4 @@
+# Merge these settings into your own Codex configuration after review.
+sandbox_mode = "read-only"
+approval_policy = "never"
+forced_login_method = "chatgpt"

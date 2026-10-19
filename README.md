@@ -3,13 +3,14 @@
 A free Claude Code plugin marketplace of engineering workflows.
 
 The `core` plugin provides engineering skills and verification support.
-The `git-flow` plugin provides Git delivery workflows. Other plugins are coming soon.
+The `git-flow` plugin provides Git delivery workflows.
+The `issues` plugin provides issue intake, planning, and acceptance review. Other plugins are coming soon.
 
 | Plugin | Purpose | Status |
 | --- | --- | --- |
 | `core` | Test-driven development, code review, and dependency updates. | available |
 | `git-flow` | Branches, worktrees, and authorized change delivery. | available |
-| `issues` | Issue planning, creation, and repository-bound tracking. | coming soon |
+| `issues` | Issue planning, creation, and repository-bound tracking. | available |
 | `audits` | Read-only engineering audits with scoped evidence and findings. | coming soon |
 | `web-qa` | Interface design, visual review, and web quality assurance. | coming soon |
 | `codex` | Opt-in Codex CLI integration. | coming soon |
@@ -21,6 +22,7 @@ After publication, run these commands in Claude Code:
 /plugin marketplace add nicolascava/agent-workflows
 /plugin install core@agent-workflows
 /plugin install git-flow@agent-workflows
+/plugin install issues@agent-workflows
 ```
 
 Requirements: Claude Code, git, gh, bun, and jq.
@@ -43,6 +45,17 @@ Declare the target repository's mode in root `git-workflow.json`:
 Missing or unknown modes stop mode-dependent mutations.
 [Workflow modes](plugins/git-flow/docs/workflow-modes.md) documents the mode table and optional
 `baseBranch` and `branchPrefix` settings.
+
+Issues skills: `create-issue`, `triage`, `project`, `review-issue`,
+`check-issue-status`, `acceptance-review`, and `github-waiting-replies`.
+Use namespaced commands such as `/issues:triage`. Issues requires `core`, declared
+through the plugin manifest's `dependencies` field. Install both from this marketplace.
+Git-flow is optional. Configure repository-owned board names, options, and native
+issue types in [issue-workflow.json](plugins/issues/docs/configuration.md).
+Without a board, creation and body refinement use plain issues with a clear message.
+Writes require the user's request and a payload preview. Acceptance publication
+requires fresh approval of the final bundle. See the
+[migration inventory](plugins/issues/docs/migration.md) for shipped files and limits.
 
 ## Hooks
 

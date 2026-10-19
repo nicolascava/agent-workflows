@@ -54,8 +54,8 @@ Git-flow is optional. Configure repository-owned board names, options, and nativ
 issue types in [issue-workflow.json](plugins/issues/docs/configuration.md).
 Without a board, creation and body refinement use plain issues with a clear message.
 Writes require the user's request and a payload preview. Acceptance publication
-requires fresh approval of the final bundle. See the
-[migration inventory](plugins/issues/docs/migration.md) for shipped files and limits.
+requires fresh approval of the final bundle.
+
 
 ## Hooks
 

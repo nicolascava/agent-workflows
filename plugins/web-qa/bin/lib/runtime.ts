@@ -12,7 +12,8 @@ export function run(executable: string, args: string[], label: string, env = pro
     env, stdout: "pipe", stderr: "pipe", timeout: 300_000,
   });
   if (child.exitCode !== 0 || child.signalCode) {
-    throw new Error(`${label} failed (${child.signalCode || child.exitCode}). ${child.stderr.toString().trim()}`);
+    const details = [child.stderr, child.stdout].map(value => value.toString().trim()).filter(Boolean).join("\n");
+    throw new Error(`${label} failed (${child.signalCode || child.exitCode}).${details ? `\n${details}` : ""}`);
   }
   return child.stdout.toString().trim();
 }

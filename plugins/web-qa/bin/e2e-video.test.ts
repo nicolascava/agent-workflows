@@ -28,6 +28,16 @@ test("video accepts an available Playwright executable when no local one exists"
   expect(f.run("e2e-video.ts", [f.config, f.output]).code).toBe(0);
 });
 
+test("video includes Playwright diagnostics written to stdout", () => {
+  const f = fixture(); f.media();
+  f.tool("playwright", "console.log('Browser executable is missing.'); process.exit(7)");
+  const r = f.run("e2e-video.ts", [f.config, f.output]);
+  expect(r.code).not.toBe(0);
+  expect(r.err).toContain("Browser executable is missing.");
+  expect(existsSync(f.output)).toBe(false);
+  expect(readdirSync(f.app).filter(n => n.startsWith(".web-qa-"))).toEqual([]);
+});
+
 for (const missing of ["ffmpeg", "ffprobe", "Playwright"]) test(`video explains missing ${missing}`, () => {
   const f = fixture();
   if (missing !== "ffmpeg") f.tool("ffmpeg", "process.exit(0)");

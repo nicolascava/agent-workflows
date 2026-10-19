@@ -26,6 +26,12 @@ git diff --cached --check
 Validation checks the marketplace and every plugin.
 CI also runs Gitleaks on the repository history.
 
+The canonical verification-source contract is
+`plugins/core/docs/verification-source.md`. Edit it and copy the exact bytes to
+every other plugin's `docs/verification-source.md`. Keep plugin-specific workflow
+instructions in the calling skills. Installed plugins use only their local copy;
+`scripts/verification-source-contract.test.ts` discovers and checks all copies.
+
 To apply private rules, pass a local file:
 
 ```sh

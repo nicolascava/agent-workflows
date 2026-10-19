@@ -16,7 +16,8 @@ function git(cwd: string, ...args: string[]) {
 }
 
 function fixture() {
-  const root = realpathSync(mkdtempSync(join(import.meta.dir, ".test-source-")));
+  // Git discovery must not escape the fixture into the enclosing repository.
+  const root = realpathSync(mkdtempSync(resolve(import.meta.dir, "../../../.git/issues-source-")));
   temporary.push(root);
   const upstream = join(root, "upstream.git");
   const work = join(root, "current worktree");

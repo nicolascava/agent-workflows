@@ -52,10 +52,10 @@ test("helper entry points have a Bun shebang and executable permissions", () => 
 });
 
 const actionPins = new Map([
-  ["actions/checkout", "34e114876b0b11c390a56381ad16ebd13914f8d5"],
-  ["actions/setup-node", "49933ea5288caeca8642d1e84afbd3f7d6820020"],
-  ["oven-sh/setup-bun", "4bc04d37a750122a420985ada21198f5743458b5"],
-  ["actions/upload-artifact", "ea165f8d65b6e75b540449e92b4886f43607fa02"],
+  ["actions/checkout", "3d3c42e5aac5ba805825da76410c181273ba90b1"],
+  ["actions/setup-node", "949feb2413d6458794dcd2491c4babbbce0c15c1"],
+  ["oven-sh/setup-bun", "0c5077e51419868618aeaa5fe8019c62421857d6"],
+  ["actions/upload-artifact", "cf430e030ddbb5b0abf93d22962f4752f3646cd9"],
 ]);
 
 test("CI templates parse, contain only public pins, and have no private paths or identities", () => {
@@ -74,12 +74,18 @@ test("CI templates parse, contain only public pins, and have no private paths or
       const [action, pin] = reference.split("@");
       expect(actionPins.has(action), file).toBe(true);
       expect(pin, file).toBe(actionPins.get(action));
+      expect(content, file).toMatch(new RegExp(`uses: ${action}@${pin} # v\\d+\\.\\d+\\.\\d+(?:\\r?\\n|$)`));
     }
     for (const [, image] of content.matchAll(/(?:image:\s*|\s)([^\s"']+@sha256:[a-f0-9]+)/g)) {
       expect(image, file).toMatch(/@sha256:[a-f0-9]{64}$/);
     }
   }
   expect(actions).toBeGreaterThan(0);
+});
+
+test("runtime setup leaves package-manager caching to the adopting repository", () => {
+  const runtime = Bun.YAML.parse(readFileSync(resolve(root, "templates/runtime-steps.yml"), "utf8"));
+  expect(runtime.node[0].with["package-manager-cache"]).toBe(false);
 });
 
 test("scanner manifest matches workflow images and records license provenance", () => {

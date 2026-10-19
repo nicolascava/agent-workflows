@@ -5,8 +5,9 @@ description: Design and implement application interfaces using local tokens, com
 
 # Interface design
 
-Read `${CLAUDE_PLUGIN_ROOT}/docs/design-contract.md`. It defines the implementation
-contract for tokens, components, states, accessibility, performance, and evidence.
+Read `${CLAUDE_PLUGIN_ROOT}/docs/design-contract.md`. Use it to record the
+intended-design spec the implementer builds against, including tokens, components,
+states, accessibility, and performance.
 
 1. Identify the user, task, primary action, and requested change. Discover local
    app and UI code, design guidance, semantic tokens, wrappers, supported themes,

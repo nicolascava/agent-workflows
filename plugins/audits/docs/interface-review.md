@@ -1,5 +1,10 @@
 # Interface review criteria
 
+This is the audit rubric. Read the project's intended-design contract when one
+exists and evaluate the implementation against it. Without one, use repository
+conventions and the evidence below; record missing design intent as a limit.
+The review never requires the web-qa plugin or its files.
+
 Discover application entry points, routes, UI packages, local component wrappers,
 tokens, themes, style rules, and existing examples from repository guidance,
 workspace manifests, and source imports. Read the local component contract before

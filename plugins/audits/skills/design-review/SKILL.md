@@ -34,7 +34,7 @@ density, spacing, typography, labels, control grouping, and component consistenc
 Use the shared criteria for responsive layouts, keyboard and focus behavior,
 overlays, loading, empty, error, and disabled states.
 
-Compare against the repository's actual design contract and supplied references.
+Compare against the repository's design contract when present and supplied references.
 Separate a preference from a contract violation or a demonstrated usability defect.
 For each concern, cite source or rendered evidence, explain the affected task,
 and suggest a bounded change. Do not require an arbitrary count of suggestions.

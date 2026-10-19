@@ -1,4 +1,10 @@
-# Interface implementation contract
+# Intended-design specification
+
+Record the intended-design spec an implementer builds against: the user task,
+chosen direction, tokens, components, states, and behavior below. Make decisions
+concrete before editing and keep the project contract with its design documentation.
+This guide owns design and implementation decisions; an audit rubric evaluates
+the result against that contract and observed evidence.
 
 Start with the intended user, their task, and the primary action. Read the local
 routes, component wrappers, tokens, themes, styles, and representative consumers.
@@ -54,13 +60,6 @@ the repository's focused checks. Verify behavior in the browser using
 relevant sizes and themes. Where baselines exist, inspect actual, expected, and
 diff images together. Baseline updates need the user's request and a review of
 the intentional change.
-
-Record what was rendered and what was inferred from source. Source alone cannot
-prove focus behavior, accessible tree output, screen-reader behavior, or computed
-contrast. Before an accessibility compliance claim, read the exact criterion at
-`https://www.w3.org/WAI/` or `https://www.w3.org/TR/` and cite it beside the
-observed evidence. Describe unverified issues as concerns with verification
-steps. Do not call an automated scan a compliance certificate.
 
 Update repository design documentation only when a requested implementation
 changes a durable contract. Keep the explanation close to the component or token

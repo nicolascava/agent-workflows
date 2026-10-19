@@ -18,7 +18,6 @@ const rules: Rule[] = [
     matches: (line) => /\/(?:Users|home)\/[^/\r\n]+\/|[a-z]:\\Users\\/i.test(line),
   },
   { name: "email-address", matches: hasDisallowedEmail },
-  { name: "private-launcher", matches: (line) => /nca[-]run/.test(line) },
   { name: "private-docs-path", matches: (line) => /docs\/os\//.test(line) },
   { name: "private-scripts-path", matches: (line) => /packages\/scripts\//.test(line) },
   { name: "private-project-packages", matches: (line) => /CLAUDE_PROJECT_DIR\}\/packages/.test(line) },

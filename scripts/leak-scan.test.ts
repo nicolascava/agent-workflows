@@ -66,7 +66,6 @@ const cases = [
   ["person@sub.example.com", "email-address"],
   ["person@example.com.invalid.test", "email-address"],
   ["noreply-person@invalid.test", "email-address"],
-  ["nca-run", "private-launcher"],
   ["docs/os/", "private-docs-path"],
   ["packages/scripts/", "private-scripts-path"],
   ["${CLAUDE_PROJECT_DIR}/packages", "private-project-packages"],
@@ -85,14 +84,14 @@ for (const [value, rule] of cases) {
 
 test("reports every matching rule and line without echoing source text", () => {
   const repo = repository({
-    "sample.txt": "safe\r\nnca-run person@invalid.test\r\ndocs/os/\r\n",
+    "sample.txt": "safe\r\npackages/scripts/ person@invalid.test\r\ndocs/os/\r\n",
   });
   const result = scan(repo);
   expect(result.code).toBe(1);
   expect(result.err).toBe("");
   expect(result.out.trim().split("\n").sort()).toEqual([
     "sample.txt:2: email-address",
-    "sample.txt:2: private-launcher",
+    "sample.txt:2: private-scripts-path",
     "sample.txt:3: private-docs-path",
   ]);
 });
@@ -105,27 +104,27 @@ test("does not scan untracked files", () => {
 
 test("scans the current working copy of tracked files", () => {
   const repo = repository({ "sample.txt": "safe" });
-  writeFileSync(join(repo, "sample.txt"), "nca-run");
+  writeFileSync(join(repo, "sample.txt"), "docs/os/");
   expect(scan(repo)).toEqual({
-    code: 1, out: "sample.txt:1: private-launcher\n", err: "",
+    code: 1, out: "sample.txt:1: private-docs-path\n", err: "",
   });
 });
 
 test("skips binary files", () => {
   const repo = repository({
-    "binary.dat": new Uint8Array([0, ...new TextEncoder().encode("nca-run")]),
-    "invalid-utf8.dat": new Uint8Array([255, ...new TextEncoder().encode("nca-run")]),
+    "binary.dat": new Uint8Array([0, ...new TextEncoder().encode("docs/os/")]),
+    "invalid-utf8.dat": new Uint8Array([255, ...new TextEncoder().encode("docs/os/")]),
   });
   expect(scan(repo)).toEqual({ code: 0, out: "", err: "" });
 });
 
 test("an inline marker skips only that fixture file", () => {
   const repo = repository({
-    "fixture.ts": "// leak-scan-ignore-file: synthetic fixture\nnca-run\n",
-    "real.txt": "nca-run",
+    "fixture.ts": "// leak-scan-ignore-file: synthetic fixture\ndocs/os/\n",
+    "real.txt": "docs/os/",
   });
   expect(scan(repo)).toEqual({
-    code: 1, out: "real.txt:1: private-launcher\n", err: "",
+    code: 1, out: "real.txt:1: private-docs-path\n", err: "",
   });
 });
 

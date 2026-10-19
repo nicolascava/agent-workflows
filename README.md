@@ -5,7 +5,9 @@ A free Claude Code plugin marketplace of engineering workflows.
 The `core` plugin provides engineering skills and verification support.
 The `git-flow` plugin provides Git delivery workflows.
 The `issues` plugin provides issue intake, planning, and acceptance review.
-The `audits` plugin provides repository assessments and design reviews. Other plugins are coming soon.
+The `audits` plugin provides repository assessments and design reviews.
+The `web-qa` plugin provides interface implementation, browser checks, and recordings.
+Other plugins are coming soon.
 
 | Plugin | Purpose | Status |
 | --- | --- | --- |
@@ -13,7 +15,7 @@ The `audits` plugin provides repository assessments and design reviews. Other pl
 | `git-flow` | Branches, worktrees, and authorized change delivery. | available |
 | `issues` | Issue planning, creation, and repository-bound tracking. | available |
 | `audits` | Read-only engineering audits with scoped evidence and findings. | available |
-| `web-qa` | Interface design, visual review, and web quality assurance. | coming soon |
+| `web-qa` | Interface design, visual review, and web quality assurance. | available |
 | `codex` | Opt-in Codex CLI integration. | coming soon |
 | `specialists` | Specialist agents for engineering advice and review. | coming soon |
 
@@ -25,6 +27,7 @@ After publication, run these commands in Claude Code:
 /plugin install git-flow@agent-workflows
 /plugin install issues@agent-workflows
 /plugin install audits@agent-workflows
+/plugin install web-qa@agent-workflows
 ```
 
 Requirements: Claude Code, git, gh, bun, and jq.
@@ -72,6 +75,19 @@ requires a user-supplied URL and an installed Figma MCP server.
 The [source guide](plugins/audits/docs/verification-source.md) explains committed
 snapshots and requested fetches for live worktree evidence.
 SOC 2 readiness is a technical review, not an attestation.
+
+Web-qa skills: `webapp-testing`, `visual-regression`, `e2e-video`,
+`walkthrough-video`, and `interface-design`. Use namespaced commands such as
+`/web-qa:webapp-testing`. Web-qa has no hard plugin dependency. Core verification
+and audits reviews are optional. It discovers app paths, package managers,
+commands, and URLs from the target repository. Browser checks use installed
+Playwright or an available browser tool. Recordings require Bun, ffmpeg, and
+ffprobe. Optional narration uses a detected local voice. Tools are never installed
+without a user request and command preview. Videos use user-chosen output paths.
+Baseline updates require the user's request. See the
+[browser workflow](plugins/web-qa/docs/browser-workflow.md),
+[design contract](plugins/web-qa/docs/design-contract.md), and
+[video tools](plugins/web-qa/docs/video-tools.md).
 
 ## Hooks
 

@@ -1,5 +1,6 @@
 ---
 name: copy-editor
+model: inherit
 description: Review pull request titles and bodies for clear, factual copy and return a JSON rewrite proposal.
 tools: Read, Bash
 ---

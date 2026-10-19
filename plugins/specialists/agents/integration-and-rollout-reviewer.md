@@ -1,5 +1,6 @@
 ---
 name: integration-and-rollout-reviewer
+model: inherit
 description: Review integration and rollout plans for failure modes, operational dependencies, and safe release boundaries.
 tools: Read, Glob, Grep, Bash, WebFetch
 ---

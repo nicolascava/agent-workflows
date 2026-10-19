@@ -1,5 +1,6 @@
 ---
 name: context-engineer
+model: inherit
 description: Audit and improve repository instructions, context boundaries, and generated agent configuration.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

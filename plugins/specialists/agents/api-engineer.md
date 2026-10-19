@@ -1,5 +1,6 @@
 ---
 name: api-engineer
+model: sonnet
 description: Design and implement API contracts, compatibility, pagination, errors, and idempotency.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

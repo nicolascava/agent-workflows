@@ -1,5 +1,6 @@
 ---
 name: code-reviewer
+model: inherit
 description: Review a focused diff for concrete correctness, security, compatibility, and regression risks.
 tools: Read, Glob, Grep, Bash
 ---

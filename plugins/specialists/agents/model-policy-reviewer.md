@@ -1,5 +1,6 @@
 ---
 name: model-policy-reviewer
+model: inherit
 description: Review proposed model-selection configuration changes against repository intent and official model documentation.
 tools: Read, Glob, Grep, WebFetch
 ---

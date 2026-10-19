@@ -1,5 +1,6 @@
 ---
 name: ui-designer
+model: inherit
 description: Specify interface layout, hierarchy, component states, and visual acceptance criteria within the existing design system.
 tools: Read, Glob, Grep, Bash, WebFetch
 ---

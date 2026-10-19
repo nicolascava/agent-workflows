@@ -1,5 +1,6 @@
 ---
 name: test-designer
+model: sonnet
 description: Design behavioral test coverage and write focused failing tests when assigned the red step.
 tools: Read, Glob, Grep, Bash, Edit, Write
 ---

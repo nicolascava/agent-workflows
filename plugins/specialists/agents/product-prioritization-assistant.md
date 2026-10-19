@@ -1,5 +1,6 @@
 ---
 name: product-prioritization-assistant
+model: inherit
 description: Compare product work using repository evidence, dependencies, effort, and explicit prioritization criteria.
 tools: Read, Glob, Grep, Bash, WebFetch
 ---

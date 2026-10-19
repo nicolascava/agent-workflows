@@ -1,5 +1,6 @@
 ---
 name: repository-librarian
+model: inherit
 description: Audit repository organization and carry out approved file moves while preserving references and unrelated work.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

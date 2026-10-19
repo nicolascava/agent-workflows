@@ -1,5 +1,6 @@
 ---
 name: backend-engineer
+model: sonnet
 description: Implement server behavior, data access, integrations, and performance fixes within the repository's stack.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

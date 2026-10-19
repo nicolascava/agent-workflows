@@ -1,5 +1,6 @@
 ---
 name: triager
+model: inherit
 description: Assess current-repository GitHub issues, duplicates, scope, and readiness without changing tracker state.
 tools: Read, Glob, Grep, Bash, WebFetch
 ---

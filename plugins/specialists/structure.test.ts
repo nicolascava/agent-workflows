@@ -5,6 +5,11 @@ import { relative, resolve, sep } from "node:path";
 const root = import.meta.dir;
 const repo = resolve(root, "../..");
 const editing = ["Read", "Glob", "Grep", "Edit", "Write", "Bash"];
+const modelAliases = ["sonnet", "opus", "haiku", "inherit"];
+const sonnetAgents = new Set([
+  "api-engineer", "backend-engineer", "dba", "frontend-engineer",
+  "infrastructure-engineer", "test-designer",
+]);
 // Each ceiling is taken from that agent's source definition, including tool order.
 const allowed: Record<string, string[]> = {
   "api-engineer": editing,
@@ -45,7 +50,10 @@ for (const [name, ceiling] of Object.entries(allowed)) {
     const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
     expect(match).not.toBeNull();
     const metadata = Bun.YAML.parse(match![1]) as Record<string, unknown>;
-    expect(Object.keys(metadata).sort()).toEqual(["description", "name", "tools"]);
+    expect(Object.keys(metadata).sort()).toEqual(["description", "model", "name", "tools"]);
+    expect(modelAliases, name).toContain(metadata.model);
+    expect(metadata.model).toBe(sonnetAgents.has(name) ? "sonnet" : name === "economy-researcher" ? "haiku" : "inherit");
+    expect(content).not.toMatch(/\b(?:claude-[a-z0-9.-]+|(?:anthropic|bedrock|vertex)[./:][a-z0-9.:-]+|(?:sonnet|opus|haiku)[-.:][a-z0-9.:-]+)\b/i);
     expect(metadata.name).toBe(name);
     expect(typeof metadata.description).toBe("string");
     expect((metadata.description as string).trim().length).toBeGreaterThan(0);

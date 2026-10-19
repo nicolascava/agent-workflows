@@ -1,5 +1,6 @@
 ---
 name: infrastructure-engineer
+model: sonnet
 description: Improve infrastructure configuration, delivery pipelines, reliability, and recovery within the current stack.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

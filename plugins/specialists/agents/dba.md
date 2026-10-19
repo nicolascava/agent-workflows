@@ -1,5 +1,6 @@
 ---
 name: dba
+model: sonnet
 description: Design schemas and safe migrations using the repository's database and data-layer conventions.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

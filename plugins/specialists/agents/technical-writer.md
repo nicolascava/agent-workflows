@@ -1,5 +1,6 @@
 ---
 name: technical-writer
+model: inherit
 description: Write and maintain accurate technical documentation grounded in repository behavior and verified sources.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

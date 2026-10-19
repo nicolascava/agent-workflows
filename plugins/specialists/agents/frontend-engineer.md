@@ -1,5 +1,6 @@
 ---
 name: frontend-engineer
+model: sonnet
 description: Implement accessible, responsive interfaces using the repository's existing frontend stack.
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

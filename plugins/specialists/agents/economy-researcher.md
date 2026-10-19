@@ -1,5 +1,6 @@
 ---
 name: economy-researcher
+model: haiku
 description: Perform bounded repository searches and return a concise inventory with source locations.
 tools: Read, Glob, Grep
 ---

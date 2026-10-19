@@ -1,5 +1,6 @@
 ---
 name: ux-designer
+model: inherit
 description: Design user flows, information architecture, recovery paths, and usability acceptance criteria.
 tools: Read, Glob, Grep, Bash, WebFetch
 ---

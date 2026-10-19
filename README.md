@@ -42,7 +42,7 @@ Declare the target repository's mode in root `git-workflow.json`:
 `{ "workflow": "solo-shaped-kanban" }` for reviewed squash landing through `land`.
 Missing or unknown modes stop mode-dependent mutations.
 [Workflow modes](plugins/git-flow/docs/workflow-modes.md) documents the mode table and optional
-`baseBranch` and `branchPrefix` settings. Git-flow hooks are reserved for a later batch.
+`baseBranch` and `branchPrefix` settings.
 
 ## Hooks
 
@@ -69,6 +69,24 @@ Registrations live in [hooks/hooks.json](plugins/core/hooks/hooks.json).
 They follow the [Claude Code plugin hooks reference](https://code.claude.com/docs/en/plugins-reference#hooks)
 and [hook handler schema](https://code.claude.com/docs/en/hooks#configuration).
 The dispatcher and guard shim contain no repository policy hooks.
+
+## Git-flow Hooks
+
+Git-flow checks branch creation, GitHub creation and base-branch pushes before a tool runs.
+Agent branch prefixes are denied. A declared `branchPrefix` requires `<branchPrefix>/<slug>`.
+Repository creation asks for confirmation. PR creation requires `pr` mode.
+Admin merge overrides and force pushes to the base are denied.
+Direct base pushes require `solo-shaped-kanban` mode.
+The hooks read the same declaration parser as the mode helper and make no network calls.
+Declare `baseBranch`, or keep a local `origin/HEAD` symbolic ref, for base push checks.
+
+Session start can restore an existing repository-owned hooks path in a linked worktree.
+It also warns above 20 registered worktrees. Set `GIT_FLOW_WORKTREE_BUDGET` to a positive
+integer to change the threshold, or `0` to disable that advisory.
+Hooks validate `CLAUDE_PLUGIN_ROOT`. They use input `cwd`, then `CLAUDE_PROJECT_DIR`
+when `cwd` is absent. Bun must be on `PATH`. Guards deny malformed or unresolved guarded calls.
+The [hook notes](plugins/git-flow/docs/hooks.md) cover decisions, limits and the copied runtime.
+The [eval scenarios](plugins/git-flow/evals/README.md) describe manual checks.
 
 Licensed under the [MIT License](LICENSE).
 See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks.

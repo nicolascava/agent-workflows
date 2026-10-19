@@ -10,6 +10,28 @@ function command(args: string[]): string {
   return r.stdout.toString().trim();
 }
 const git = (...args: string[]) => command(["git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", ...args]);
+export type WorkflowDeclaration = { workflow: "pr" | "solo-shaped-kanban"; baseBranch?: string; branchPrefix?: string };
+
+// Hooks use declared values only. Identity and remote discovery stay in the CLI.
+export function readWorkflowDeclaration(root: string, optional = false): WorkflowDeclaration | undefined {
+  const path = join(root, "git-workflow.json");
+  let stat;
+  try { stat = lstatSync(path); } catch (error) {
+    if (optional && (error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+  if (!stat.isFile() || stat.size > 65_536) throw new Error("declaration must be a regular JSON file below 64 KiB");
+  const config = JSON.parse(readFileSync(path, "utf8"));
+  if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(k => !["workflow", "baseBranch", "branchPrefix"].includes(k))) throw new Error("invalid declaration schema");
+  if (!["pr", "solo-shaped-kanban"].includes(config.workflow)) throw new Error("unknown workflow");
+  if (config.baseBranch !== undefined) {
+    if (typeof config.baseBranch !== "string" || config.baseBranch === "HEAD" || config.baseBranch.startsWith("refs/")) throw new Error("baseBranch must be a branch name");
+    git("check-ref-format", `refs/heads/${config.baseBranch}`);
+  }
+  if (config.branchPrefix !== undefined && (typeof config.branchPrefix !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.branchPrefix) || /^(?:claude|codex|gemini|agent|assistant)(?:-|$)|^worktree(?:-|$)/i.test(config.branchPrefix))) throw new Error("branchPrefix must identify a contributor, not an agent");
+  return config as WorkflowDeclaration;
+}
+
 function main() {
   for (const key of Object.keys(process.env)) {
     if (/^GIT_(?:DIR|WORK_TREE|COMMON_DIR|INDEX_FILE|OBJECT_DIRECTORY|ALTERNATE_OBJECT_DIRECTORIES|NAMESPACE|SHALLOW_FILE|REPLACE_REF_BASE|CONFIG.*)$/.test(key)) throw new Error("repository-routing environment override is not allowed");
@@ -19,12 +41,7 @@ function main() {
   const remote = args[1] ?? "origin";
   if (git("rev-parse", "--is-inside-work-tree") !== "true") throw new Error("current directory must be a worktree");
   const root = realpathSync(git("rev-parse", "--show-toplevel"));
-  const path = join(root, "git-workflow.json");
-  const stat = lstatSync(path);
-  if (!stat.isFile() || stat.size > 65_536) throw new Error("declaration must be a regular JSON file below 64 KiB");
-  const config = JSON.parse(readFileSync(path, "utf8"));
-  if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(k => !["workflow", "baseBranch", "branchPrefix"].includes(k))) throw new Error("invalid declaration schema");
-  if (!["pr", "solo-shaped-kanban"].includes(config.workflow)) throw new Error("unknown workflow");
+  const config = readWorkflowDeclaration(root)!;
   let baseBranch = config.baseBranch;
   if (baseBranch === undefined) {
     const urls = git("remote", "get-url", "--all", remote).split("\n");
@@ -44,9 +61,11 @@ function main() {
   if (typeof branchPrefix !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(branchPrefix) || /^(?:claude|codex|gemini|agent|assistant)(?:-|$)|^worktree(?:-|$)/i.test(branchPrefix)) throw new Error("branchPrefix must identify a contributor, not an agent");
   return { root, workflow: config.workflow, baseBranch, branchPrefix, remote };
 }
-try { console.log(JSON.stringify(main())); }
-catch (error) {
-  // Avoid echoing remote diagnostics, source JSON or paths that may contain secrets.
-  const message = error instanceof Error && !/ENOENT|JSON|position|Unexpected/i.test(error.message) ? error.message : "missing or invalid declaration";
-  console.error(`workflow-mode: ${message}. ${setup}`); process.exitCode = 1;
+if (import.meta.main) {
+  try { console.log(JSON.stringify(main())); }
+  catch (error) {
+    // Avoid echoing remote diagnostics, source JSON or paths that may contain secrets.
+    const message = error instanceof Error && !/ENOENT|JSON|position|Unexpected/i.test(error.message) ? error.message : "missing or invalid declaration";
+    console.error(`workflow-mode: ${message}. ${setup}`); process.exitCode = 1;
+  }
 }

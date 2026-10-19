@@ -21,6 +21,11 @@ Unrelated tools and commands emit no decision. An empty result leaves normal per
 | Explicit feature push or ordinary PR mutation | allow | allow | allow |
 
 Allow means the hook emits no decision. Other permissions and skill gates still apply.
+If you run your own repository-creation guard, set
+`AGENT_WORKFLOWS_ALLOW_REPO_CREATE=1` in the environment launching Claude Code to
+skip this hook's repository-creation confirmation for CLI, API and MCP calls.
+Only the exact value `1` opts out. Other values retain `ask`. Repository validation,
+PR mode checks and all other guard decisions still apply.
 Issues have no separate public policy setting. Unknown declaration fields are rejected.
 A malformed declaration or unresolved guarded root denies even a creation that normally asks.
 Base checks use declared `baseBranch`, then the local `origin/HEAD` symbolic ref.

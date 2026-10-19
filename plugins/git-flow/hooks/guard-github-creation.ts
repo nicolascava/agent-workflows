@@ -14,6 +14,6 @@ export async function run(payload: Record<string, unknown>) {
     if (kinds.includes("pull-request") && config?.workflow !== "pr") { deny("PR creation requires {\"workflow\":\"pr\"} in git-workflow.json at the repository root. In solo-shaped-kanban mode, land instead."); return; }
     if (kinds.includes("repository")) createsRepository = true;
   }
-  if (createsRepository) ask("Confirm the target and visibility before creating a repository.");
+  if (createsRepository && process.env.AGENT_WORKFLOWS_ALLOW_REPO_CREATE !== "1") ask("Confirm the target and visibility before creating a repository.");
 }
 if (import.meta.main) await guard(run);

@@ -23,7 +23,7 @@ function repo(mode?: string, prefix?: string) {
 function hook(name: string, cwd: string, input: unknown, env: Record<string, string> = {}, root = plugin) {
   const result = spawnSync("/bin/bash", [join(root, "hooks", `${name}.sh`)], {
     cwd, input: typeof input === "string" ? input : JSON.stringify(input), encoding: "utf8", timeout: 6000,
-    env: { ...process.env, CLAUDE_PLUGIN_ROOT: root, ...env },
+    env: { ...process.env, CLAUDE_PLUGIN_ROOT: root, AGENT_WORKFLOWS_ALLOW_REPO_CREATE: "", ...env },
   });
   expect(result.error).toBeUndefined(); expect(result.status).toBe(0); expect(result.stderr).toBe("");
   return result.stdout.trim() ? JSON.parse(result.stdout).hookSpecificOutput : undefined;
@@ -83,7 +83,23 @@ describe("GitHub creation guard", () => {
       expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh pr create --title Example")))).toBe(mode === "pr" ? undefined : "deny");
       for (const [tool, expected] of [["mcp__github__create_repository", "ask"], ["mcp__github_enterprise__create_pull_request", mode === "pr" ? undefined : "deny"], ["mcp__github__create_issue", undefined]] as const) expect(decision(hook("guard-github-creation", cwd, { cwd, tool_name: tool, tool_input: { name: "widget" } }))).toBe(expected);
     });
+    test(`${mode ?? "undeclared"}: repository opt-out skips only confirmation`, () => {
+      const cwd = repo(mode), env = { AGENT_WORKFLOWS_ALLOW_REPO_CREATE: "1" };
+      for (const command of ["gh repo create acme/widget", "gh --hostname github.com repo create widget", "gh api user/repos -X POST"]) {
+        expect(hook("guard-github-creation", cwd, bash(cwd, command), env)).toBeUndefined();
+      }
+      expect(hook("guard-github-creation", cwd, { cwd, tool_name: "mcp__github__create_repository", tool_input: { name: "widget" } }, env)).toBeUndefined();
+      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh repo create acme/widget; gh pr create"), env))).toBe(mode === "pr" ? undefined : "deny");
+      writeFileSync(join(cwd, "git-workflow.json"), "{");
+      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh repo create acme/widget"), env))).toBe("deny");
+    });
   }
+  test("only the literal repository opt-out value 1 disables confirmation", () => {
+    const cwd = repo("pr");
+    for (const value of ["", "0", "true", "yes", " 1", "1 "]) {
+      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh repo create acme/widget"), { AGENT_WORKFLOWS_ALLOW_REPO_CREATE: value }))).toBe("ask");
+    }
+  });
   test("API create routes cannot bypass mode checks", () => {
     const cwd = repo("solo-shaped-kanban");
     for (const command of ["gh api repos/acme/widget/pulls -f title=Example", "gh api --method POST /repos/acme/widget/pulls", "gh api graphql -f 'query=mutation { createPullRequest(input: {}) { clientMutationId } }'", "gh api repos/acme/widget/pulls --input payload.json", "gh api repos/acme/widget/pulls -XGET; gh pr create"]) expect(decision(hook("guard-github-creation", cwd, bash(cwd, command)))).toBe("deny");

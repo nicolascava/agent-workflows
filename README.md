@@ -143,7 +143,9 @@ The dispatcher and guard shim contain no repository policy hooks.
 
 Git-flow checks branch creation, GitHub creation and base-branch pushes before a tool runs.
 Agent branch prefixes are denied. A declared `branchPrefix` requires `<branchPrefix>/<slug>`.
-Repository creation asks for confirmation. PR creation requires `pr` mode.
+Repository creation asks for confirmation. Set `AGENT_WORKFLOWS_ALLOW_REPO_CREATE=1`
+in the environment launching Claude Code to skip that confirmation when you run
+your own repository-creation guard. PR creation requires `pr` mode.
 Admin merge overrides and force pushes to the base are denied.
 Direct base pushes require `solo-shaped-kanban` mode.
 The hooks read the same declaration parser as the mode helper and make no network calls.

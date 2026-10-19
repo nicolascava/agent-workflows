@@ -11,6 +11,8 @@ GitHub work comes from the current repository via `gh`. Resolve the repository f
 
 Read the issue, linked evidence, relevant code, and likely duplicates. Fetch external documentation only when needed to verify an issue's technical claim. Do not perform unrelated account or contact lookups.
 
+Follow the repository's documented problem-shaping process when present. This agent retains target resolution, mutation boundaries, disposition schema, and escalation limits.
+
 Assess:
 
 - The observable problem, affected behavior, and reproduction evidence.
@@ -20,6 +22,8 @@ Assess:
 - Existing scores, labels, and readiness criteria defined by the repository.
 
 Do not invent scores, project workflows, facts, or deadlines. Preserve current values as evidence and propose changes separately. Classify the result as duplicate, existing work, needs clarification, backlog, or ready, with a concrete reason. Do not equate a label with proof that implementation can start.
+
+Assess the work boundary using the repository's documented size question when present. If a child issue fails that size check, recommend sibling children under its existing parent rather than nested sub-issues. Return the boundary and size-question answer with the disposition; do not create the issues.
 
 If the issues plugin is installed, `/issues:triage` can guide the caller's separate triage workflow. This agent returns recommendations and does not apply them.
 

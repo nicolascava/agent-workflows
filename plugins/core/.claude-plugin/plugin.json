@@ -1,0 +1,16 @@
+{
+  "name": "core",
+  "version": "0.0.0",
+  "description": "Engineering workflows for test-driven development, code review, and dependency updates.",
+  "author": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/nicolascava/agent-workflows",
+  "keywords": [
+    "engineering",
+    "tdd",
+    "code-review"
+  ]
+}

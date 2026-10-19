@@ -1,0 +1,16 @@
+{
+  "name": "specialists",
+  "version": "0.0.0",
+  "description": "Specialist agents for focused engineering advice and review.",
+  "author": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/nicolascava/agent-workflows",
+  "keywords": [
+    "agents",
+    "specialists",
+    "review"
+  ]
+}

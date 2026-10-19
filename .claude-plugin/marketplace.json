@@ -1,0 +1,54 @@
+{
+  "name": "agent-workflows",
+  "owner": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "metadata": {
+    "description": "Free Claude Code plugins for engineering workflows."
+  },
+  "plugins": [
+    {
+      "name": "core",
+      "source": "./plugins/core",
+      "description": "Engineering workflows for test-driven development, code review, and dependency updates.",
+      "category": "development"
+    },
+    {
+      "name": "git-flow",
+      "source": "./plugins/git-flow",
+      "description": "Git workflows for branches, worktrees, and authorized change delivery.",
+      "category": "development"
+    },
+    {
+      "name": "issues",
+      "source": "./plugins/issues",
+      "description": "Issue workflows for planning, creation, and repository-bound tracking.",
+      "category": "productivity"
+    },
+    {
+      "name": "audits",
+      "source": "./plugins/audits",
+      "description": "Read-only engineering audits with scoped evidence and findings.",
+      "category": "quality"
+    },
+    {
+      "name": "web-qa",
+      "source": "./plugins/web-qa",
+      "description": "Web interface design, visual review, and quality assurance workflows.",
+      "category": "quality"
+    },
+    {
+      "name": "codex",
+      "source": "./plugins/codex",
+      "description": "Opt-in Codex CLI integration for engineering workflows.",
+      "category": "integration"
+    },
+    {
+      "name": "specialists",
+      "source": "./plugins/specialists",
+      "description": "Specialist agents for focused engineering advice and review.",
+      "category": "development"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "issues",
+  "version": "0.0.0",
+  "description": "Issue workflows for planning, creation, and repository-bound tracking.",
+  "author": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/nicolascava/agent-workflows",
+  "keywords": [
+    "issues",
+    "planning",
+    "tracking"
+  ]
+}

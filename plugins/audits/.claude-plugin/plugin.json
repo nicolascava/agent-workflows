@@ -1,0 +1,16 @@
+{
+  "name": "audits",
+  "version": "0.0.0",
+  "description": "Read-only engineering audits with scoped evidence and findings.",
+  "author": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/nicolascava/agent-workflows",
+  "keywords": [
+    "audits",
+    "evidence",
+    "quality"
+  ]
+}

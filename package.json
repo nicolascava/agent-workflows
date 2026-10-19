@@ -1,0 +1,10 @@
+{
+  "name": "agent-workflows",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "leak-scan": "bun scripts/leak-scan.ts",
+    "validate": "command claude plugin validate . && for plugin in plugins/*; do command claude plugin validate \"$plugin\" || exit 1; done"
+  }
+}

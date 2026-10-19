@@ -1,0 +1,16 @@
+{
+  "name": "web-qa",
+  "version": "0.0.0",
+  "description": "Web interface design, visual review, and quality assurance workflows.",
+  "author": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/nicolascava/agent-workflows",
+  "keywords": [
+    "web",
+    "design",
+    "qa"
+  ]
+}

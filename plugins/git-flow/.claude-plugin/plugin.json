@@ -1,0 +1,16 @@
+{
+  "name": "git-flow",
+  "version": "0.0.0",
+  "description": "Git workflows for branches, worktrees, and authorized change delivery.",
+  "author": {
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/nicolascava/agent-workflows",
+  "keywords": [
+    "git",
+    "worktrees",
+    "delivery"
+  ]
+}

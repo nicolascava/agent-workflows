@@ -1,0 +1,14 @@
+---
+name: resolve-conflicts
+description: Resolve an authorized merge or rebase conflict by preserving intent, verify the result, and report the remaining Git state. Works in either workflow mode.
+---
+
+Requires `core` for `/core:verify` and, when a behavior fix needs tests, `/core:tdd`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md` and `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md`.
+
+1. Inspect status, unmerged paths, current branch and the exact in-progress operation. Preserve unrelated staged and unstaged work. If no conflict is active, report that. Start a merge or rebase only when the user requested it, the tree is clean and a specific fetched base is available. Do not turn a conflict-resolution request into an unrequested branch rewrite.
+2. Identify repository and branch ownership. For a PR, resolve author, actor, head repository/branch/OID and apply the author gate before editing or continuing. Refuse fork branch mutation in this batch. An authorized in-progress rebase has a changing local HEAD; record its original PR head and operation state instead of treating the intermediate HEAD as the PR's published head.
+3. Inspect each conflict's base, both sides, surrounding code, relevant commits and tests. Explain intent where the resolution is not mechanical. In a merge, ours is the current branch and theirs the merged branch. In a rebase, ours is the fetched upstream plus replayed commits and theirs is the commit being replayed. Do not accept ours or theirs wholesale unless the semantics justify it. Ask for a decision when intended behavior is ambiguous while continuing independent inspection.
+4. Edit only scoped conflict paths. Remove conflict markers and check for semantic conflicts beyond the markers. Regenerate lockfiles or generated artifacts only with the repository's documented tool and permission to run it. Use `/core:tdd` for a behavior correction that needs regression coverage. Do not install tools or start services just to resolve a file.
+5. Stage the resolved paths, inspect the staged diff and use the appropriate continuation for the existing operation, such as `git rebase --continue` or the documented merge completion. Do not create an unrelated commit, skip a commit, abort or reset unless requested. After three failed resolve/continue cycles, stop with the state intact and report what remains.
+6. When the operation completes, run `/core:verify` against a freshly fetched explicit base. Require relevant checks to pass and confirm there are no unmerged paths. Record exact HEAD/tree/base OIDs and any evidence gaps. A changed diff needs a fresh review before delivery.
+7. Report resolved paths and intent, current operation state, source OIDs, verification and any unresolved conflicts. Do not push, merge a PR or land as part of this skill. If invoked inside an authorized rebase, return to that workflow for its push gate.

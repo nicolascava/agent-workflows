@@ -3,12 +3,12 @@
 A free Claude Code plugin marketplace of engineering workflows.
 
 The `core` plugin provides engineering skills and verification support.
-Other plugins are coming soon.
+The `git-flow` plugin provides Git delivery workflows. Other plugins are coming soon.
 
 | Plugin | Purpose | Status |
 | --- | --- | --- |
 | `core` | Test-driven development, code review, and dependency updates. | available |
-| `git-flow` | Branches, worktrees, and authorized change delivery. | coming soon |
+| `git-flow` | Branches, worktrees, and authorized change delivery. | available |
 | `issues` | Issue planning, creation, and repository-bound tracking. | coming soon |
 | `audits` | Read-only engineering audits with scoped evidence and findings. | coming soon |
 | `web-qa` | Interface design, visual review, and web quality assurance. | coming soon |
@@ -20,6 +20,7 @@ After publication, run these commands in Claude Code:
 ```text
 /plugin marketplace add nicolascava/agent-workflows
 /plugin install core@agent-workflows
+/plugin install git-flow@agent-workflows
 ```
 
 Requirements: Claude Code, git, gh, bun, and jq.
@@ -28,6 +29,20 @@ The `codex` plugin also requires the Codex CLI.
 Plugin skills use namespaced commands, such as `/core:tdd`.
 Core skills: `tdd`, `debug`, `condense`, `verify`, `review`,
 `adversarial-review`, `skill-review`, `context-diet`, and `update-deps`.
+
+Git-flow skills: `commit`, `create-branch`, `land`, `merge`, `pr`, `update-pr`,
+`rebase`, `resolve-conflicts`, `apply-pr-feedback`, and `execute-test-plan`.
+Use namespaced commands such as `/git-flow:pr`.
+Git-flow requires `core`, declared through the plugin manifest's `dependencies` field.
+Install both from this marketplace. Its helpers use their own installed plugin root;
+[shared helper conventions](plugins/git-flow/docs/safety.md) explain the copied verification helper.
+
+Declare the target repository's mode in root `git-workflow.json`:
+`{ "workflow": "pr" }` for PR delivery, or
+`{ "workflow": "solo-shaped-kanban" }` for reviewed squash landing through `land`.
+Missing or unknown modes stop mode-dependent mutations.
+[Workflow modes](plugins/git-flow/docs/workflow-modes.md) documents the mode table and optional
+`baseBranch` and `branchPrefix` settings. Git-flow hooks are reserved for a later batch.
 
 ## Hooks
 

@@ -8,7 +8,7 @@ The `issues` plugin provides issue intake, planning, and acceptance review.
 The `audits` plugin provides repository assessments and design reviews.
 The `web-qa` plugin provides interface implementation, browser checks, and recordings.
 The `codex` plugin provides optional task delegation through the Codex CLI.
-Other plugins are coming soon.
+The `specialists` plugin provides focused engineering agents for implementation, design, and review.
 
 | Plugin | Purpose | Status |
 | --- | --- | --- |
@@ -18,7 +18,7 @@ Other plugins are coming soon.
 | `audits` | Read-only engineering audits with scoped evidence and findings. | available |
 | `web-qa` | Interface design, visual review, and web quality assurance. | available |
 | `codex` | Opt-in Codex CLI integration. | available |
-| `specialists` | Specialist agents for engineering advice and review. | coming soon |
+| `specialists` | Specialist agents for engineering advice and review. | available |
 
 After publication, run these commands in Claude Code:
 
@@ -30,6 +30,7 @@ After publication, run these commands in Claude Code:
 /plugin install audits@agent-workflows
 /plugin install web-qa@agent-workflows
 /plugin install codex@agent-workflows
+/plugin install specialists@agent-workflows
 ```
 
 Requirements: Claude Code, git, gh, bun, and jq.
@@ -100,6 +101,17 @@ Pace output is advisory. Provider examples are optional and copied by hand;
 installing this Claude plugin does not configure Codex. See the
 [Codex setup guide](plugins/codex/docs/codex-setup.md) for sign-in, settings,
 command rules, and helper limits.
+
+Specialists agents: `api-engineer`, `backend-engineer`, `code-reviewer`,
+`context-engineer`, `copy-editor`, `dba`, `economy-researcher`, `frontend-engineer`,
+`infrastructure-engineer`, `integration-and-rollout-reviewer`, `model-policy-reviewer`,
+`product-prioritization-assistant`, `repository-librarian`, `technical-writer`,
+`test-designer`, `triager`, `ui-designer`, and `ux-designer`.
+Use scoped agent names such as `specialists:code-reviewer`.
+Specialists has no hard plugin dependency. Agents discover the target repository's
+stack and commands. Read-only roles return advice; editing roles stay within the
+assigned task. See the [agent guide](plugins/specialists/docs/README.md) for role
+boundaries and optional workflow integrations.
 
 ## Hooks
 

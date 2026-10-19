@@ -1,0 +1,15 @@
+rules:
+  - id: dangerous-dynamic-execution
+    languages: [javascript, typescript]
+    message: Dynamic code execution can run untrusted input.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: Function(...)
+    severity: ERROR
+  - id: shell-execution
+    languages: [javascript, typescript]
+    message: Shell execution needs a fixed command and validated arguments.
+    pattern-either:
+      - pattern: child_process.exec(...)
+      - pattern: child_process.execSync(...)
+    severity: ERROR

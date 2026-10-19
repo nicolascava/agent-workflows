@@ -77,7 +77,7 @@ snapshots and requested fetches for live worktree evidence.
 SOC 2 readiness is a technical review, not an attestation.
 
 Web-qa skills: `webapp-testing`, `visual-regression`, `e2e-video`,
-`walkthrough-video`, and `interface-design`. Use namespaced commands such as
+`walkthrough-video`, `interface-design`, and `setup-ci`. Use namespaced commands such as
 `/web-qa:webapp-testing`. Web-qa has no hard plugin dependency. Core verification
 and audits reviews are optional. It discovers app paths, package managers,
 commands, and URLs from the target repository. Browser checks use installed
@@ -88,6 +88,9 @@ Baseline updates require the user's request. See the
 [browser workflow](plugins/web-qa/docs/browser-workflow.md),
 [design contract](plugins/web-qa/docs/design-contract.md), and
 [video tools](plugins/web-qa/docs/video-tools.md).
+CI setup uses discovered commands and pinned checks-only templates. Workflow writes
+require a path and full content preview. Optional scanners retain their upstream
+licenses and provenance in the [CI guide](plugins/web-qa/docs/ci-checks.md).
 
 ## Hooks
 

@@ -1,0 +1,20 @@
+{
+  "gitleaks": {
+    "image": "zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
+    "version": "v8.30.1",
+    "license": "MIT",
+    "provenance": "https://github.com/gitleaks/gitleaks/issues/2176"
+  },
+  "osv": {
+    "image": "ghcr.io/google/osv-scanner:v2.5.1@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734",
+    "version": "v2.5.1",
+    "license": "Apache-2.0",
+    "provenance": "https://github.com/google/osv-scanner/releases/tag/v2.5.1"
+  },
+  "semgrep": {
+    "image": "semgrep/semgrep:1.175.0@sha256:b94b53d02fd4a022f9eac4e2af1380f5c3c4c21400e79d3336bdff1d1db5e796",
+    "version": "v1.175.0",
+    "license": "LGPL-2.1",
+    "provenance": "https://hub.docker.com/r/semgrep/semgrep"
+  }
+}

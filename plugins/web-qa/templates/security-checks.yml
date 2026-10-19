@@ -1,0 +1,49 @@
+# Optional full-source scanners. Preview network use and policy before adoption.
+# Copy security-rules.yml to .github/security/semgrep.yml with a content preview.
+name: Security checks
+on:
+  pull_request:
+  merge_group:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  scanners:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Prepare reports
+        run: mkdir -p "$RUNNER_TEMP/security-reports"
+      - name: Secrets
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" \
+            zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            dir --source /src --no-banner --redact --report-format json \
+            > "$RUNNER_TEMP/security-reports/secrets.log" 2>&1
+      - name: Static analysis
+        if: ${{ !cancelled() }}
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" \
+            -v "$GITHUB_WORKSPACE/.github/security/semgrep.yml:/rules/semgrep.yml:ro" -w /src \
+            semgrep/semgrep:1.175.0@sha256:b94b53d02fd4a022f9eac4e2af1380f5c3c4c21400e79d3336bdff1d1db5e796 \
+            semgrep scan --config /rules/semgrep.yml --metrics=off --error --json \
+            > "$RUNNER_TEMP/security-reports/static.json"
+      - name: Dependency vulnerabilities
+        if: ${{ !cancelled() }}
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" -w /src \
+            ghcr.io/google/osv-scanner:v2.5.1@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734 \
+            scan source --format json > "$RUNNER_TEMP/security-reports/dependencies.json"
+      - name: Upload scanner evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: security-checks-${{ github.sha }}
+          path: ${{ runner.temp }}/security-reports
+          if-no-files-found: error
+          retention-days: 7

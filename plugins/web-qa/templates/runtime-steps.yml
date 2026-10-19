@@ -1,0 +1,9 @@
+# Select only needed entries. Discover versions from repository declarations.
+node:
+  - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+    with:
+      node-version: "__NODE_VERSION__"
+bun:
+  - uses: oven-sh/setup-bun@4bc04d37a750122a420985ada21198f5743458b5 # v2.0.1
+    with:
+      bun-version: "__BUN_VERSION__"

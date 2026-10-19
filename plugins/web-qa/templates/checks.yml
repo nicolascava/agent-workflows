@@ -1,0 +1,41 @@
+# Replace every __TOKEN__ with a discovered repository value before writing.
+name: Checks
+on:
+  pull_request:
+  merge_group:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: "__APP_DIRECTORY__"
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      # Replace this step with the applicable runtime-steps.yml entries.
+      - name: Set up discovered runtime and package manager
+        run: |
+          __RUNTIME_SETUP_COMMAND__
+      - name: Install declared dependencies
+        run: |
+          __INSTALL_COMMAND__
+      # Remove a check only if it is absent from the target repository. Report it.
+      - name: Lint
+        run: |
+          __LINT_COMMAND__
+      - name: Typecheck
+        run: |
+          __TYPECHECK_COMMAND__
+      - name: Test
+        run: |
+          __TEST_COMMAND__
+      - name: Build
+        run: |
+          __BUILD_COMMAND__

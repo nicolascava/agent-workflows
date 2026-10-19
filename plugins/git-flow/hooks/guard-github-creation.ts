@@ -11,7 +11,7 @@ export async function run(payload: Record<string, unknown>) {
   let createsRepository = false;
   for (const { kinds, call } of calls) {
     const { config } = await repository(payload, call);
-    if (kinds.includes("pull-request") && config?.workflow !== "pr") { deny("PR creation requires a pr workflow declaration. Use the landing workflow in solo-shaped-kanban mode."); return; }
+    if (kinds.includes("pull-request") && config?.workflow !== "pr") { deny("PR creation requires {\"workflow\":\"pr\"} in git-workflow.json at the repository root. In solo-shaped-kanban mode, land instead."); return; }
     if (kinds.includes("repository")) createsRepository = true;
   }
   if (createsRepository) ask("Confirm the target and visibility before creating a repository.");

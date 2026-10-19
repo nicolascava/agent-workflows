@@ -60,7 +60,7 @@ export async function run(payload: Record<string, unknown>) {
       return destination === base || destination === "HEAD" || destination.includes("*") || destination === "";
     });
     if (touchesBase && (force || mirror || refs.some(r => r.startsWith("+")) || repo.config?.workflow !== "solo-shaped-kanban")) {
-      deny("Base pushes require solo-shaped-kanban mode and must not force or mirror updates."); return;
+      deny("Base pushes require {\"workflow\":\"solo-shaped-kanban\"} in git-workflow.json and must not force or mirror updates."); return;
     }
   }
 }

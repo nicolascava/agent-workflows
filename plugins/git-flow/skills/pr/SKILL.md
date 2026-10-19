@@ -3,7 +3,7 @@ name: pr
 description: Create a pull request for the current feature branch after verification and visible-description checks. Use only in PR workflow mode.
 ---
 
-Requires `core` for `/core:verify`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_SKILL_DIR}/../../docs/pr-copy.md`.
+Requires `core` for `/core:verify`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_PLUGIN_ROOT}/docs/pr-copy.md`.
 
 1. Inspect the branch, worktree, remote and any existing PR read-only. Resolve mode. In `solo-shaped-kanban`, refuse PR creation and point to `/core:review` then `/git-flow:land`. Missing or unknown mode blocks creation and shows the setup message. Require an owned feature branch, clean tree and no in-progress Git operation. If a PR already exists, report it and use `/git-flow:update-pr` for metadata changes.
 2. Confirm the explicit target repository and base branch. Fetch that branch with `verification-source.ts`, pin full base/HEAD/tree OIDs and inspect the actual diff. Do not draft from a commit subject or stale local base alone. If the work contains dependent reviewable layers, read `${CLAUDE_PLUGIN_ROOT}/docs/stacked-prs.md`, propose the stack and obtain approval before creating multiple branches or PRs. A stack is optional.

@@ -3,7 +3,7 @@ name: execute-test-plan
 description: Execute the unchecked items in a PR test plan, fix authorized failures, and update checkboxes only when exact-head evidence and metadata authorization permit it.
 ---
 
-Requires `core` for `/core:tdd` and `/core:verify`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_SKILL_DIR}/../../docs/pr-copy.md`.
+Requires `core` for `/core:tdd` and `/core:verify`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_PLUGIN_ROOT}/docs/pr-copy.md`.
 
 1. Inspect the PR and test plan read-only even if mode is missing. Require `pr` before mode-dependent PR mutations. In solo mode, refuse the PR workflow and point to `/git-flow:land` for delivery. Missing or unknown mode shows the setup message. Resolve the explicit repository, open PR, author, actor, exact head and base. Apply the author gate before checkout changes, code edits or metadata edits. Refuse fork branch mutation. Do not silently switch from a dirty or unrelated worktree.
 2. Require the current checkout to match the PR head and inspect all local changes. Fetch the PR base with `verification-source.ts` and pin full base/HEAD/tree OIDs. Save the exact original title and body to unique temporary files. Preserve existing checked evidence and any legacy hidden comment. Do not turn stale or unavailable source evidence into a passed test.

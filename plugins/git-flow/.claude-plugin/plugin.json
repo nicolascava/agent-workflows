@@ -12,6 +12,8 @@
     "core"
   ],
   "author": {
-    "name": "Contributors"
-  }
+    "name": "Nicolas Cava",
+    "url": "https://nicolascava.com"
+  },
+  "repository": "https://github.com/nicolascava/agent-workflows"
 }

@@ -3,7 +3,7 @@ name: apply-pr-feedback
 description: Inspect PR review feedback, apply justified fixes with verification, and reply or resolve threads only for authorized exact payloads.
 ---
 
-Requires `core` for `/core:tdd` and `/core:verify`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_SKILL_DIR}/../../docs/pr-copy.md` for plain writing.
+Requires `core` for `/core:tdd` and `/core:verify`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_PLUGIN_ROOT}/docs/pr-copy.md` for plain writing.
 
 1. Read-only inspection runs first. Resolve mode; require `pr` before this workflow's mutations. In solo mode, refuse PR feedback handling and point to `/git-flow:land` for delivery. A missing or unknown declaration shows the setup message. Resolve the explicit repository and open PR, author, actor, base and exact head. Apply the author gate before edits, commits, pushes, replies or resolution. Refuse fork branch mutation. Require the correct branch at the published PR head and a clean starting tree.
 2. Fetch complete review threads, comments, reviews and changed files, following all pagination including nested thread comments. Use explicit repository/PR IDs. A partial page, missing author or failed request is incomplete. Keep root comment IDs for REST replies and thread node IDs for GraphQL resolution. They are different identifiers.

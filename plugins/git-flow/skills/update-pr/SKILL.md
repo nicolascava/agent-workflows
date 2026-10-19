@@ -3,7 +3,7 @@ name: update-pr
 description: Update the current PR title and visible description from its actual diff. With --title-description-only, change metadata only and preserve test evidence.
 ---
 
-Requires `core` for `/core:verify` when new verification is requested. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_SKILL_DIR}/../../docs/pr-copy.md`.
+Requires `core` for `/core:verify` when new verification is requested. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_PLUGIN_ROOT}/docs/pr-copy.md`.
 
 1. Inspect the explicit repository and open PR read-only. Resolve mode; require `pr` before editing. Refuse in solo mode and point to `/git-flow:land`. Missing or unknown mode shows the setup message and stops metadata mutation. Resolve author, actor and exact head/base facts. Apply the author and payload gate before a PR edit. Do not check out a different branch or update another author's PR without the relevant authority.
 2. Fetch the PR's actual base with `verification-source.ts`. Require the local HEAD to equal the PR head for code-derived claims. Read the immutable diff and complete existing title/body. Save the original body and head OID. If a matching worktree is unavailable, report that evidence gap and stop rather than treating another checkout as the source.

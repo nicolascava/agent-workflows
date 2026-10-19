@@ -3,7 +3,7 @@ name: land
 description: Squash a reviewed branch onto the delivery base and push in solo-shaped-kanban mode, only after a current-conversation request following diff presentation.
 ---
 
-Requires `core` for `/core:verify` and a fresh `/core:review`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_SKILL_DIR}/../../docs/landing.md` before proceeding.
+Requires `core` for `/core:verify` and a fresh `/core:review`. Read `${CLAUDE_PLUGIN_ROOT}/docs/safety.md`, `${CLAUDE_PLUGIN_ROOT}/docs/workflow-modes.md` and `${CLAUDE_PLUGIN_ROOT}/docs/landing.md` before proceeding.
 
 Run read-only inspection even if mode resolution fails. In `pr` mode, refuse landing and point to `/git-flow:pr` and `/git-flow:merge`. With a missing or unknown declaration, stop before any base push and show the setup message from the mode doc. Proceed only in `solo-shaped-kanban`.
 

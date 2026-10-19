@@ -10,7 +10,7 @@ test("distinguishes no parent from malformed hierarchy", async () => {
   await expect(readHierarchy(async () => '{"data":{"node":{}}}', "a")).rejects.toThrow();
 });
 test("builds native hierarchy writes with typed variables and exact anchors", () => {
-  expect(buildHierarchyMutation({ operation: "attach", parentId: "p", childId: "c" }).variables.input).toEqual({ issueId: "p", subIssueId: "c" });
+  expect(buildHierarchyMutation({ operation: "attach", parentId: "p", childId: "c" }).variables.input).toEqual({ issueId: "p", subIssueId: "c", replaceParent: false });
   expect(buildHierarchyMutation({ operation: "reorder", parentId: "p", childId: "c", beforeId: "a" }).variables.input.beforeId).toBe("a");
   expect(() => buildHierarchyMutation({ operation: "reorder", parentId: "p", childId: "c" })).toThrow();
 });

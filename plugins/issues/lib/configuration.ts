@@ -5,9 +5,10 @@ type Settings = { project?: { owner: string; number: number }; fields?: Record<s
 const keys = { fields: ["status", "priority", "impact", "effort", "severity"], statuses: ["triage", "ready", "building", "review", "acceptance", "shipped"], issueTypes: ["bug", "feature", "task", "project"], ranks: ["priority", "impact", "effort", "severity"] };
 export function parseConfiguration(raw: any): Settings {
   if (!raw || typeof raw !== "object" || Array.isArray(raw) || Object.keys(raw).some(k => k !== "issues")) throw new Error("Expected only an issues section");
-  const settings = raw.issues ?? {};
+  const settings = Object.hasOwn(raw, "issues") ? raw.issues : {};
   if (!settings || typeof settings !== "object" || Array.isArray(settings) || Object.keys(settings).some(k => !["project", ...Object.keys(keys)].includes(k))) throw new Error("Unknown issue setting");
-  if (settings.project) {
+  if (Object.hasOwn(settings, "project")) {
+    if (!settings.project || typeof settings.project !== "object" || Array.isArray(settings.project)) throw new Error("Invalid project setting");
     if (Object.keys(settings.project).some(k => !["owner", "number"].includes(k))) throw new Error("Unknown project setting");
     parseProject(`${settings.project.owner}/${positive(settings.project.number)}`);
   }

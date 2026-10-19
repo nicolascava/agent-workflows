@@ -12,7 +12,7 @@ test("paginates snapshots and preserves text values", async () => {
   const gh = async () => envelope("items", [{ id: String(++calls), content: { __typename: "Issue", number: calls, title: "Work", url: `https://github.com/sample/widgets/issues/${calls}` }, fieldValues: { nodes: [{ field: { name: "Urgency" }, text: "P0" }], pageInfo: { hasNextPage: false } } }], calls === 1, "next");
   const result = await readBoardSnapshot(gh, "B"); expect(result.items).toHaveLength(2); expect(result.items[0].values.Urgency).toBe("P0");
 });
-test("never reports truncated field values as blank", async () => {
+test("never reports incomplete field values as blank", async () => {
   await expect(readBoardSnapshot(async () => envelope("items", [{ id: "I", content: null, fieldValues: { nodes: [], pageInfo: { hasNextPage: true } } }]), "B")).rejects.toThrow();
 });
 test("item lookup is fresh and refuses duplicate matches", async () => {

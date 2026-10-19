@@ -1,0 +1,8 @@
+#!/usr/bin/env bun
+import { cli, options } from "../lib/cli.ts";
+import { readConfiguration, resolveConfiguration } from "../lib/configuration.ts";
+import { runGh } from "../lib/gh.ts";
+await cli(async () => {
+  const args = options(process.argv.slice(2), ["repo", "project", "config"]);
+  return resolveConfiguration(readConfiguration(args.config), runGh, { repository: args.repo, project: args.project });
+});

@@ -8,6 +8,9 @@
   },
   "license": "MIT",
   "repository": "https://github.com/nicolascava/agent-workflows",
+  "dependencies": [
+    "core"
+  ],
   "keywords": [
     "issues",
     "planning",

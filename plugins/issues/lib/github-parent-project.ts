@@ -10,7 +10,8 @@ export async function readHierarchy(gh: Runner, id: string) {
 }
 export function buildHierarchyMutation(operation: Operation) {
   if (!operation.parentId || !operation.childId || operation.parentId === operation.childId) throw new Error("Invalid hierarchy IDs");
-  const input: Record<string, string> = { issueId: operation.parentId, subIssueId: operation.childId };
+  const input: Record<string, string | boolean> = { issueId: operation.parentId, subIssueId: operation.childId };
+  if (operation.operation === "attach") input.replaceParent = false;
   if (operation.operation === "reorder") {
     if (Boolean(operation.beforeId) === Boolean(operation.afterId) || [operation.beforeId, operation.afterId].includes(operation.childId)) throw new Error("Exactly one distinct anchor is required");
     if (operation.beforeId) input.beforeId = operation.beforeId;

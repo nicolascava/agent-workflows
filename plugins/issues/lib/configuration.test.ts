@@ -19,6 +19,9 @@ test("unavailable boards degrade with a clear message", async () => {
 test("rejects malformed settings, unsafe numbers, and unknown keys", () => {
   for (const issues of [{ project: { owner: "sample", number: 0 } }, { fields: { status: 4 } }, { surprise: true }, { statuses: { ready: "" } }]) expect(() => parseConfiguration({ issues })).toThrow();
 });
+test("rejects explicit null sections and false project declarations", () => {
+  for (const issues of [null, { project: null }, { project: false }, { project: 0 }, { project: [] }]) expect(() => parseConfiguration({ issues })).toThrow();
+});
 test("explicit project arguments override repository settings", async () => {
   const result = await resolveConfiguration({ issues: { project: { owner: "sample", number: 2 } } }, async args => args[0] === "repo" ? '{"nameWithOwner":"sample/widgets"}' : '{"id":"B","number":3,"title":"Other","closed":false}', { project: "sample/3" });
   expect(result.project?.number).toBe(3);

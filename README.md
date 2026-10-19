@@ -2,12 +2,12 @@
 
 A free Claude Code plugin marketplace of engineering workflows.
 
-This Phase 1 scaffold contains manifests and empty component directories.
-No workflows have been migrated yet.
+The `core` plugin provides engineering skills and verification support.
+Other plugins are coming soon.
 
 | Plugin | Purpose | Status |
 | --- | --- | --- |
-| `core` | Test-driven development, code review, and dependency updates. | coming soon |
+| `core` | Test-driven development, code review, and dependency updates. | available |
 | `git-flow` | Branches, worktrees, and authorized change delivery. | coming soon |
 | `issues` | Issue planning, creation, and repository-bound tracking. | coming soon |
 | `audits` | Read-only engineering audits with scoped evidence and findings. | coming soon |
@@ -26,7 +26,8 @@ Requirements: Claude Code, git, gh, bun, and jq.
 The `codex` plugin also requires the Codex CLI.
 
 Plugin skills use namespaced commands, such as `/core:tdd`.
-That command will become available when the skill ships.
+Core skills: `tdd`, `debug`, `condense`, `verify`, `review`,
+`adversarial-review`, `skill-review`, `context-diet`, and `update-deps`.
 
 Licensed under the [MIT License](LICENSE).
 See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks.

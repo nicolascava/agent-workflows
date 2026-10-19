@@ -1,0 +1,4 @@
+interface:
+  display_name: "Adversarial review"
+  short_description: "Independent read-only review gate"
+  default_prompt: "Use /core:adversarial-review as the standalone or inline gate. Delegate exactly one fresh isolated native read-only reviewer, distinct from the producer, over a redacted packet and pinned current-worktree evidence. Block if read-only delegation is unavailable. Report findings without changing source or external state."

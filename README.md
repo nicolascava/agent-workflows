@@ -4,14 +4,15 @@ A free Claude Code plugin marketplace of engineering workflows.
 
 The `core` plugin provides engineering skills and verification support.
 The `git-flow` plugin provides Git delivery workflows.
-The `issues` plugin provides issue intake, planning, and acceptance review. Other plugins are coming soon.
+The `issues` plugin provides issue intake, planning, and acceptance review.
+The `audits` plugin provides repository assessments and design reviews. Other plugins are coming soon.
 
 | Plugin | Purpose | Status |
 | --- | --- | --- |
 | `core` | Test-driven development, code review, and dependency updates. | available |
 | `git-flow` | Branches, worktrees, and authorized change delivery. | available |
 | `issues` | Issue planning, creation, and repository-bound tracking. | available |
-| `audits` | Read-only engineering audits with scoped evidence and findings. | coming soon |
+| `audits` | Read-only engineering audits with scoped evidence and findings. | available |
 | `web-qa` | Interface design, visual review, and web quality assurance. | coming soon |
 | `codex` | Opt-in Codex CLI integration. | coming soon |
 | `specialists` | Specialist agents for engineering advice and review. | coming soon |
@@ -23,6 +24,7 @@ After publication, run these commands in Claude Code:
 /plugin install core@agent-workflows
 /plugin install git-flow@agent-workflows
 /plugin install issues@agent-workflows
+/plugin install audits@agent-workflows
 ```
 
 Requirements: Claude Code, git, gh, bun, and jq.
@@ -56,6 +58,20 @@ Without a board, creation and body refinement use plain issues with a clear mess
 Writes require the user's request and a payload preview. Acceptance publication
 requires fresh approval of the final bundle.
 
+Audits skills: `security-audit`, `debt-audit`, `domain-audit`,
+`soc2-readiness-audit`, `code-quality-audit`, `codebase-review`,
+`documentation-review`, `design-review`, `frontend-review`, `figma-review`,
+and `team-health-analysis`. Use namespaced commands such as `/audits:security-audit`.
+Audits has no hard plugin dependency. Its source helper is vendored locally;
+`/core:verify` and `/core:review` are optional follow-ups when installed and requested.
+The [assessment contract](plugins/audits/docs/assessment-contract.md) defines evidence,
+severity, findings, verification, and report disposition. Reports stay in the conversation
+by default. Writes require the user's request and a target and content preview.
+Report files require a user-chosen path. Browser tools are optional. Figma review
+requires a user-supplied URL and an installed Figma MCP server.
+The [source guide](plugins/audits/docs/verification-source.md) explains committed
+snapshots and requested fetches for live worktree evidence.
+SOC 2 readiness is a technical review, not an attestation.
 
 ## Hooks
 

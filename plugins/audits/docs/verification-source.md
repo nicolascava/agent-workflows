@@ -1,8 +1,18 @@
 # Source identity
 
-Run from the target worktree. Identify its configured remote and base branch from
-repository guidance and local configuration. Do not assume a branch name. Ask if
-the intended base is ambiguous.
+For the default read-only assessment, resolve the requested revision, or current
+HEAD, to a full commit OID and verify it is a commit. Record its tree OID and read
+files from those objects. State that this is a committed snapshot. Local edits
+are excluded; mark the result partial if they belong to the requested subject.
+This mode does not establish remote freshness or verify live working files.
+
+For current-worktree verification, use the helper below only when the user has
+requested its fetch. An audit request alone does not authorize Git metadata
+writes. Show the exact command, target worktree, configured remote, base branch,
+and temporary ref namespace before running it. If fetching is not requested,
+use the committed snapshot or report blocked when live evidence is required.
+Identify the remote and base from repository guidance and local configuration.
+Do not assume a branch name. Ask if the intended base is ambiguous.
 
 ```sh
 bun "${CLAUDE_PLUGIN_ROOT}/bin/verification-source.ts" --base <base-branch> --remote <configured-remote>
@@ -18,11 +28,12 @@ Treat nonzero exit or missing `status: ready` as blocked source verification.
 Never substitute an old tracking ref, `FETCH_HEAD`, another checkout, or a tag.
 Keep remote credentials out of the report.
 
-Source collection adds Git objects and briefly creates a private ref. It removes
-that ref on completion. It disables repository hooks and file-system monitors.
+Source collection adds Git objects and briefly creates a
+`refs/audits-verification/<unique-id>` ref. It removes that ref on completion.
+It disables repository hooks and file-system monitors.
 It does not change the working tree, index, HEAD, tracking refs, or `FETCH_HEAD`.
-This metadata operation is the audit's sole routine write exception. If fetching
-is prohibited or unavailable, report that limit. Do not claim a fresh remote base.
+If fetching is prohibited or unavailable, report that limit. Do not claim a
+fresh remote base.
 
 ## Bind the evidence
 
@@ -39,11 +50,8 @@ that keep the same status. Capture hashes before inspecting files and repeat
 them before reporting. Also recheck HEAD, tree, and status. If they drift, repeat
 the affected review or mark it partial. Do not attach earlier evidence to new code.
 
-An explicitly requested committed snapshot may instead use a supplied full commit
-OID. Verify that it resolves to a commit and read files from that commit. Record
-the tree OID. Never label current working files as that snapshot. This mode does
-not prove the remote branch is current. An explicit PR comparison needs full base
-and head OIDs, not moving branch names. If the skill requires the helper, use it.
+Never label current working files as a committed snapshot. An explicit PR
+comparison needs full base and head OIDs, not moving branch names.
 
 For external evidence, record the repository or file identifier, exact query,
 time window, retrieval time, pagination coverage, and revision when available.

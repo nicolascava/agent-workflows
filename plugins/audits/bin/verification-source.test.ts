@@ -118,10 +118,17 @@ describe("current-worktree verification source", () => {
   });
 
   test("preserves FETCH_HEAD and remote-tracking refs", () => {
-    const { work, oid } = fixture();
+    const { root, upstream, work, oid } = fixture();
     git(work, "fetch", "origin", "main");
     const fetched = git(work, "rev-parse", "FETCH_HEAD");
-    ready(work);
+    const publisher = join(root, "publisher");
+    git(root, "clone", upstream, publisher);
+    git(publisher, "config", "user.name", "Test author");
+    git(publisher, "config", "user.email", "author@example.com");
+    writeFileSync(join(publisher, "file.txt"), "new base\n");
+    git(publisher, "commit", "-am", "Advance base");
+    git(publisher, "push", "origin", "main");
+    expect(ready(work).baseOid).toBe(git(publisher, "rev-parse", "HEAD"));
     expect(git(work, "rev-parse", "FETCH_HEAD")).toBe(fetched);
     expect(git(work, "rev-parse", "refs/remotes/origin/main")).toBe(oid);
   });

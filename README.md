@@ -2,25 +2,9 @@
 
 A free Claude Code plugin marketplace of engineering workflows.
 
-The `core` plugin provides engineering skills and verification support.
-The `git-flow` plugin provides Git delivery workflows.
-The `issues` plugin provides issue intake, planning, and acceptance review.
-The `audits` plugin provides repository assessments and design reviews.
-The `web-qa` plugin provides interface implementation, browser checks, and recordings.
-The `codex` plugin provides optional task delegation through the Codex CLI.
-The `specialists` plugin provides focused engineering agents for implementation, design, and review.
+## Install
 
-| Plugin | Purpose | Status |
-| --- | --- | --- |
-| `core` | Test-driven development, code review, and dependency updates. | available |
-| `git-flow` | Branches, worktrees, and authorized change delivery. | available |
-| `issues` | Issue planning, creation, and repository-bound tracking. | available |
-| `audits` | Read-only engineering audits with scoped evidence and findings. | available |
-| `web-qa` | Interface design, visual review, and web quality assurance. | available |
-| `codex` | Opt-in Codex CLI integration. | available |
-| `specialists` | Specialist agents for engineering advice and review. | available |
-
-After publication, run these commands in Claude Code:
+Run these commands in Claude Code, keeping only the plugins you want:
 
 ```text
 /plugin marketplace add nicolascava/agent-workflows
@@ -33,131 +17,60 @@ After publication, run these commands in Claude Code:
 /plugin install specialists@agent-workflows
 ```
 
-Requirements: Claude Code, git, gh, bun, and jq.
-The `codex` plugin also requires the Codex CLI installed and signed in with ChatGPT.
+You need Claude Code, `git`, `gh`, `bun`, and `jq`.
 
-Plugin skills use namespaced commands, such as `/core:tdd`.
-Core skills: `tdd`, `debug`, `condense`, `verify`, `review`,
-`adversarial-review`, `skill-review`, `context-diet`, and `update-deps`.
+## Plugins
 
-Git-flow skills: `commit`, `create-branch`, `land`, `merge`, `pr`, `update-pr`,
-`rebase`, `resolve-conflicts`, `apply-pr-feedback`, and `execute-test-plan`.
-Use namespaced commands such as `/git-flow:pr`.
-Git-flow requires `core`, declared through the plugin manifest's `dependencies` field.
-Install both from this marketplace. Its helpers use their own installed plugin root;
-[shared helper conventions](plugins/git-flow/docs/safety.md) explain the copied verification helper.
+| Plugin | What it does | Needs |
+| --- | --- | --- |
+| `core` | Test-driven development, debugging, review, verification, and dependency updates. | Nothing else |
+| `git-flow` | Branches, commits, pull requests, and squash landing. | `core` |
+| `issues` | Issue creation, triage, planning, and acceptance review. | `core` |
+| `audits` | Read-only audits of security, debt, code, docs, and design. | Nothing else |
+| `web-qa` | Browser tests, visual checks, demo videos, interface design, and CI setup. | Nothing else |
+| `codex` | Hands a bounded task to the Codex CLI. | Codex CLI signed in with ChatGPT |
+| `specialists` | Focused agents for engineering advice, implementation, and review. | Nothing else |
 
-Declare the target repository's mode in root `git-workflow.json`:
-`{ "workflow": "pr" }` for PR delivery, or
-`{ "workflow": "solo-shaped-kanban" }` for reviewed squash landing through `land`.
-Missing or unknown modes stop mode-dependent mutations.
-[Workflow modes](plugins/git-flow/docs/workflow-modes.md) documents the mode table and optional
-`baseBranch` and `branchPrefix` settings.
+Commands carry the plugin name, such as `/core:tdd` or `/git-flow:pr`. Agents do too, such as `specialists:code-reviewer`.
 
-Issues skills: `create-issue`, `triage`, `project`, `review-issue`,
-`check-issue-status`, `acceptance-review`, and `github-waiting-replies`.
-Use namespaced commands such as `/issues:triage`. Issues requires `core`, declared
-through the plugin manifest's `dependencies` field. Install both from this marketplace.
-Git-flow is optional. Configure repository-owned board names, options, and native
-issue types in [issue-workflow.json](plugins/issues/docs/configuration.md).
-Without a board, creation and body refinement use plain issues with a clear message.
-Writes require the user's request and a payload preview. Acceptance publication
-requires fresh approval of the final bundle.
+- `core`: `tdd`, `debug`, `condense`, `verify`, `review`, `adversarial-review`, `skill-review`, `context-diet`, and `update-deps`.
+- `git-flow`: `commit`, `create-branch`, `land`, `merge`, `pr`, `update-pr`, `rebase`, `resolve-conflicts`, `apply-pr-feedback`, and `execute-test-plan`.
+- `issues`: `create-issue`, `triage`, `project`, `review-issue`, `check-issue-status`, `acceptance-review`, and `github-waiting-replies`.
+- `audits`: `security-audit`, `debt-audit`, `domain-audit`, `soc2-readiness-audit`, `code-quality-audit`, `codebase-review`, `documentation-review`, `design-review`, `frontend-review`, `figma-review`, and `team-health-analysis`.
+- `web-qa`: `webapp-testing`, `visual-regression`, `e2e-video`, `walkthrough-video`, `interface-design`, and `setup-ci`.
+- `codex`: `codex`.
+- `specialists`: `api-engineer`, `backend-engineer`, `code-reviewer`, `context-engineer`, `copy-editor`, `dba`, `economy-researcher`, `frontend-engineer`, `infrastructure-engineer`, `integration-and-rollout-reviewer`, `model-policy-reviewer`, `product-prioritization-assistant`, `repository-librarian`, `technical-writer`, `test-designer`, `triager`, `ui-designer`, and `ux-designer`.
 
-Audits skills: `security-audit`, `debt-audit`, `domain-audit`,
-`soc2-readiness-audit`, `code-quality-audit`, `codebase-review`,
-`documentation-review`, `design-review`, `frontend-review`, `figma-review`,
-and `team-health-analysis`. Use namespaced commands such as `/audits:security-audit`.
-Audits has no hard plugin dependency. Its source helper is vendored locally;
-`/core:verify` and `/core:review` are optional follow-ups when installed and requested.
-The [assessment contract](plugins/audits/docs/assessment-contract.md) defines evidence,
-severity, findings, verification, and report disposition. Reports stay in the conversation
-by default. Writes require the user's request and a target and content preview.
-Report files require a user-chosen path. Browser tools are optional. Figma review
-requires a user-supplied URL and an installed Figma MCP server.
-The [source guide](plugins/audits/docs/verification-source.md) explains committed
-snapshots and requested fetches for live worktree evidence.
-SOC 2 readiness is a technical review, not an attestation.
+## Setup
 
-Web-qa skills: `webapp-testing`, `visual-regression`, `e2e-video`,
-`walkthrough-video`, `interface-design`, and `setup-ci`. Use namespaced commands such as
-`/web-qa:webapp-testing`. Web-qa has no hard plugin dependency. Core verification
-and audits reviews are optional. It discovers app paths, package managers,
-commands, and URLs from the target repository. Browser checks use installed
-Playwright or an available browser tool. Recordings require Bun, ffmpeg, and
-ffprobe. Optional narration uses a detected local voice. Tools are never installed
-without a user request and command preview. Videos use user-chosen output paths.
-Baseline updates require the user's request. See the
-[browser workflow](plugins/web-qa/docs/browser-workflow.md),
-[design contract](plugins/web-qa/docs/design-contract.md), and
-[video tools](plugins/web-qa/docs/video-tools.md).
-CI setup uses discovered commands and pinned checks-only templates. Workflow writes
-require a path and full content preview. Optional scanners retain their upstream
-licenses and provenance in the [CI guide](plugins/web-qa/docs/ci-checks.md).
+Declare how changes land in a root `git-workflow.json`. Use `{ "workflow": "pr" }` for pull requests, or `{ "workflow": "solo-shaped-kanban" }` to land reviewed work as one squashed commit through `land`. Without a known mode, `git-flow` stops before any step that depends on it. [Workflow modes](plugins/git-flow/docs/workflow-modes.md) covers the optional `baseBranch` and `branchPrefix` settings.
 
-Codex skills: `codex`. Use `/codex:codex` for bounded delegation.
-The default is read-only. Explicit `--write` disables the filesystem sandbox.
-Pace output is advisory. Provider examples are optional and copied by hand;
-installing this Claude plugin does not configure Codex. See the
-[Codex setup guide](plugins/codex/docs/codex-setup.md) for sign-in, settings,
-command rules, and helper limits.
+`issues` reads board names, options, and issue types from [`issue-workflow.json`](plugins/issues/docs/configuration.md). Without a board, it uses plain issues.
 
-Specialists agents: `api-engineer`, `backend-engineer`, `code-reviewer`,
-`context-engineer`, `copy-editor`, `dba`, `economy-researcher`, `frontend-engineer`,
-`infrastructure-engineer`, `integration-and-rollout-reviewer`, `model-policy-reviewer`,
-`product-prioritization-assistant`, `repository-librarian`, `technical-writer`,
-`test-designer`, `triager`, `ui-designer`, and `ux-designer`.
-Use scoped agent names such as `specialists:code-reviewer`.
-Specialists has no hard plugin dependency. Agents discover the target repository's
-stack and commands. Read-only roles return advice; editing roles stay within the
-assigned task. See the [agent guide](plugins/specialists/docs/README.md) for role
-boundaries and optional workflow integrations.
+Installing `codex` does not configure Codex. The [Codex setup guide](plugins/codex/docs/codex-setup.md) covers sign-in and settings.
+
+`web-qa` videos need `ffmpeg` and `ffprobe`. Figma review needs a Figma URL and the Figma MCP server.
+
+## Safety
+
+- Nothing is written to GitHub, files, or CI without your request and a preview of the content.
+- Publishing an acceptance review needs fresh approval of the final version.
+- Audit reports stay in the conversation unless you pick a file path.
+- Tools are never installed without your request and a preview of the command.
+- `codex` is read-only by default. `--write` turns off the filesystem sandbox.
+- SOC 2 readiness is a technical review, not an attestation.
 
 ## Hooks
 
-`core` adds documentation guidance at session start.
-It also points to [Next.js guidance](plugins/core/docs/nextjs.md) when the target
-package or a declared package workspace lists `next` in runtime or development dependencies.
-Hooks use the input `cwd`, with `CLAUDE_PROJECT_DIR` as a fallback.
-They validate `CLAUDE_PLUGIN_ROOT` against the physical installation path.
-Input has a two-second deadline and a 1 MiB size limit.
-Invalid input emits no advisory context. The shared guard shim denies invalid calls.
+`core` adds documentation guidance at session start, plus Next.js guidance when the project uses `next`. It can format files after each edit; start Claude Code with `CORE_FORMAT_AFTER_EDIT=1` to turn that on. See [core hooks](plugins/core/docs/hooks.md).
 
-Formatting after `Write`, `Edit`, or `NotebookEdit` is off by default.
-Start Claude Code with `CORE_FORMAT_AFTER_EDIT=1 claude` to enable it.
-The hook uses a `format` script, then a `lint:fix` script, with the package manager
-selected by the target package's lockfile. Conflicting lockfiles skip formatting.
-Without a matching script and lockfile, it looks for a Prettier, Biome, or ESLint
-config and its installed executable in `node_modules/.bin`.
-It never installs tools. Missing formatters and files outside the target package are skipped.
-Formatter commands have a ten-second deadline. Their output is discarded.
-Generated directories such as `node_modules`, `.next`, `dist`, and `build` are skipped.
-The formatter uses the edited file path. `NotebookEdit` events without a file path are skipped.
+`git-flow` checks branch names, pushes to the base branch, and repository and pull request creation before they run. It blocks force pushes and admin merges to the base branch. See [git-flow hooks](plugins/git-flow/docs/hooks.md).
 
-Registrations live in [hooks/hooks.json](plugins/core/hooks/hooks.json).
-They follow the [Claude Code plugin hooks reference](https://code.claude.com/docs/en/plugins-reference#hooks)
-and [hook handler schema](https://code.claude.com/docs/en/hooks#configuration).
-The dispatcher and guard shim contain no repository policy hooks.
+## More docs
 
-## Git-flow Hooks
+- [Audit contract](plugins/audits/docs/assessment-contract.md) and [verification source](plugins/audits/docs/verification-source.md).
+- [Browser workflow](plugins/web-qa/docs/browser-workflow.md), [design contract](plugins/web-qa/docs/design-contract.md), [video tools](plugins/web-qa/docs/video-tools.md), and [CI checks](plugins/web-qa/docs/ci-checks.md).
+- [Agent guide](plugins/specialists/docs/README.md).
+- [Git-flow safety](plugins/git-flow/docs/safety.md) and [eval scenarios](plugins/git-flow/evals/README.md).
 
-Git-flow checks branch creation, GitHub creation and base-branch pushes before a tool runs.
-Agent branch prefixes are denied. A declared `branchPrefix` requires `<branchPrefix>/<slug>`.
-Repository creation asks for confirmation. Set `AGENT_WORKFLOWS_ALLOW_REPO_CREATE=1`
-in the environment launching Claude Code to skip that confirmation when you run
-your own repository-creation guard. PR creation requires `pr` mode.
-Admin merge overrides and force pushes to the base are denied.
-Direct base pushes require `solo-shaped-kanban` mode.
-The hooks read the same declaration parser as the mode helper and make no network calls.
-Declare `baseBranch`, or keep a local `origin/HEAD` symbolic ref, for base push checks.
-
-Session start can restore an existing repository-owned hooks path in a linked worktree.
-It also warns above 20 registered worktrees. Set `GIT_FLOW_WORKTREE_BUDGET` to a positive
-integer to change the threshold, or `0` to disable that advisory.
-Hooks validate `CLAUDE_PLUGIN_ROOT`. They use input `cwd`, then `CLAUDE_PROJECT_DIR`
-when `cwd` is absent. Bun must be on `PATH`. Guards deny malformed or unresolved guarded calls.
-The [hook notes](plugins/git-flow/docs/hooks.md) cover decisions, limits and the copied runtime.
-The [eval scenarios](plugins/git-flow/evals/README.md) describe manual checks.
-
-Licensed under the [MIT License](LICENSE).
-See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks.
+Licensed under the [MIT License](LICENSE). See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks.

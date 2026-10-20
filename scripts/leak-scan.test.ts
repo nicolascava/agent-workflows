@@ -4,6 +4,8 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(import.meta.dir, "..");
+// A linked worktree has a `.git` file, so ask Git where its directory is.
+const gitDir = Bun.spawnSync(["git", "rev-parse", "--absolute-git-dir"], { cwd: root }).stdout.toString().trim();
 const scanner = join(import.meta.dir, "leak-scan.ts");
 const repositories: string[] = [];
 
@@ -19,7 +21,7 @@ function git(repo: string, ...args: string[]) {
 }
 
 function repository(files: Record<string, string | Uint8Array> = {}) {
-  const repo = mkdtempSync(join(root, ".git", "leak-scan-test-"));
+  const repo = mkdtempSync(join(gitDir, "leak-scan-test-"));
   repositories.push(repo);
   git(repo, "init", "--quiet");
   for (const [name, content] of Object.entries(files)) {

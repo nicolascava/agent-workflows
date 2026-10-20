@@ -4,6 +4,8 @@ import { join, resolve } from "node:path";
 
 const helper = resolve(import.meta.dir, "verification-source.ts");
 const temporary: string[] = [];
+// A linked worktree has a `.git` file, so ask Git where its directory is.
+const gitDir = Bun.spawnSync(["git", "rev-parse", "--absolute-git-dir"], { cwd: import.meta.dir }).stdout.toString().trim();
 const localGitEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_ALLOW_PROTOCOL: "file" };
 
 afterEach(() => {
@@ -17,7 +19,7 @@ function git(cwd: string, ...args: string[]) {
 }
 
 function fixture() {
-  const root = realpathSync(mkdtempSync(resolve(import.meta.dir, "../../../.git/audits-source-")));
+  const root = realpathSync(mkdtempSync(join(gitDir, "audits-source-")));
   temporary.push(root);
   const upstream = join(root, "upstream.git");
   const work = join(root, "current worktree");

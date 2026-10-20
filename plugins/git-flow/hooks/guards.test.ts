@@ -106,6 +106,17 @@ describe("GitHub creation guard", () => {
     expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh api user/repos -X POST")))).toBe("ask");
     for (const command of ["gh api repos/acme/widget/pulls -X GET", "gh pr view 1", "echo 'gh pr create'", "gh issue create"]) expect(hook("guard-github-creation", cwd, bash(cwd, command))).toBeUndefined();
   });
+  test("single-quoted backticks in PR titles are literal, real substitution is denied as quoting", () => {
+    const cwd = repo("pr");
+    expect(hook("guard-github-creation", cwd, bash(cwd, "gh pr create -R acme/widget --base trunk --title 'Set `trunk` as the PR base branch' --body-file body.md"))).toBeUndefined();
+    expect(hook("guard-github-creation", cwd, bash(cwd, "gh pr create --title 'Costs $5 for `x`'"))).toBeUndefined();
+    for (const command of ['gh pr create --title "Set `trunk` as base"', "gh pr create --title Set\\ `trunk`", "gh pr create --title \"Set $(echo trunk) as base\"", "gh pr create --title $TITLE"]) {
+      const output = hook("guard-github-creation", cwd, bash(cwd, command));
+      expect(decision(output)).toBe("deny");
+      expect(output.permissionDecisionReason).toContain("quot");
+      expect(output.permissionDecisionReason).toContain("--title 'Set `name` as");
+    }
+  });
   test("global flags between subcommands do not bypass creation checks", () => {
     const cwd = repo("solo-shaped-kanban");
     for (const command of ["gh pr --repo acme/widget create", "gh pr -Racme/widget create", "gh api -X POST repos/acme/widget/pulls", "gh api '/repos/acme/widget/pulls?example=1' -f title=Example"]) expect(decision(hook("guard-github-creation", cwd, bash(cwd, command)))).toBe("deny");

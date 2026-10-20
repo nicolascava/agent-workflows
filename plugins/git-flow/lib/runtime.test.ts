@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { runBounded } from "./bounded-command";
 import { containsPath, localFile } from "./hook-runtime";
 import { readWorkflowDeclaration } from "../bin/workflow-mode";
+import { invocations } from "./shell-commands";
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -33,6 +34,17 @@ test("declaration reader is importable and does not discover defaults", () => {
       writeFileSync(join(root, "git-workflow.json"), text); expect(() => readWorkflowDeclaration(root)).toThrow();
     }
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("only shell-expanded dollar signs and backticks mark a call dynamic", () => {
+  const unsafe = (command: string) => invocations(command, "/work").at(-1)!.unsafe;
+  for (const command of ["gh pr create --title 'Set `x` as $base'", "gh pr create --title \\$x\\`y\\`"]) expect(unsafe(command)).toBe(false);
+  for (const command of ["bash -c \"git push origin 'HEAD:$X'\"", "eval \"gh pr create --title '$X'\"", "bash -c \"gh pr create --title '$(x)'\"", "gh pr create --title \"Set `x`\"", "gh pr create --title `x`", "gh pr create --title \"$(x)\"", "gh pr create --title $x", "gh pr create --title \"${x}\""]) expect(unsafe(command)).toBe(true);
+  expect(invocations("cd 'a$b' && git status", "/work")[0]!.directory).toBe("/work/a$b");
+  expect(invocations("cd \"a$b\" && git status", "/work")[0]!.directory).toBeUndefined();
+  expect(invocations("git -C 'a`b`' status", "/work")[0]!.directory).toBe("/work/a`b`");
+  expect(invocations("git -C a$b status", "/work")[0]!.directory).toBeUndefined();
+  expect(invocations("git -Ca$b status", "/work")[0]!.directory).toBeUndefined();
 });
 
 test("bounded commands kill descendants on deadline and normal completion", async () => {

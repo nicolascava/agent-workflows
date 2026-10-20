@@ -1,6 +1,5 @@
 {
   "name": "core",
-  "version": "0.0.0",
   "description": "Engineering workflows for test-driven development, code review, and dependency updates.",
   "author": {
     "name": "Nicolas Cava",

@@ -1,6 +1,5 @@
 {
   "name": "git-flow",
-  "version": "0.0.0",
   "description": "Git workflows for branches, worktrees, and authorized change delivery.",
   "license": "MIT",
   "keywords": [

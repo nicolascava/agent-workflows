@@ -1,6 +1,5 @@
 {
   "name": "audits",
-  "version": "0.0.0",
   "description": "Read-only engineering audits with scoped evidence and findings.",
   "author": {
     "name": "Nicolas Cava",

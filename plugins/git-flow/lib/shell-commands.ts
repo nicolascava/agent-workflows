@@ -83,6 +83,8 @@ export function invocations(text: string, directory?: string, depth = 0): Invoca
     }
     if (char === "\\" && quote !== "'") {
       if (text[i + 1] === "\n") { i++; continue; }
+      // Inside double quotes a backslash escapes only these; otherwise it stays literal.
+      if (quote === '"' && !["$", "`", '"', "\\"].includes(text[i + 1] ?? "")) { word += char; started = true; continue; }
       word += text[++i] ?? ""; started = true; continue;
     }
     if (quote) { if (char === quote) quote = ""; else { word += char; if (quote === '"' && char === "$") expands = true; } started = true; continue; }

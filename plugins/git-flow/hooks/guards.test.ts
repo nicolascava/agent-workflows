@@ -117,6 +117,12 @@ describe("GitHub creation guard", () => {
       expect(output.permissionDecisionReason).toContain("--title 'Set `name` as");
     }
   });
+  test("a shell-expanded PR title outside pr mode reports the workflow requirement first", () => {
+    const cwd = repo("solo-shaped-kanban");
+    const output = hook("guard-github-creation", cwd, bash(cwd, 'gh pr create --title "Fix `x`"'));
+    expect(decision(output)).toBe("deny");
+    expect(output.permissionDecisionReason).toContain('requires {"workflow":"pr"}');
+  });
   test("global flags between subcommands do not bypass creation checks", () => {
     const cwd = repo("solo-shaped-kanban");
     for (const command of ["gh pr --repo acme/widget create", "gh pr -Racme/widget create", "gh api -X POST repos/acme/widget/pulls", "gh api '/repos/acme/widget/pulls?example=1' -f title=Example"]) expect(decision(hook("guard-github-creation", cwd, bash(cwd, command)))).toBe("deny");

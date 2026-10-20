@@ -40,6 +40,9 @@ test("only shell-expanded dollar signs and backticks mark a call dynamic", () =>
   const unsafe = (command: string) => invocations(command, "/work").at(-1)!.unsafe;
   for (const command of ["gh pr create --title 'Set `x` as $base'", "gh pr create --title \\$x\\`y\\`"]) expect(unsafe(command)).toBe(false);
   for (const command of ["bash -c \"git push origin 'HEAD:$X'\"", "eval \"gh pr create --title '$X'\"", "bash -c \"gh pr create --title '$(x)'\"", "gh pr create --title \"Set `x`\"", "gh pr create --title `x`", "gh pr create --title \"$(x)\"", "gh pr create --title $x", "gh pr create --title \"${x}\""]) expect(unsafe(command)).toBe(true);
+  for (const command of ["bash -c \"gh pr create --title \\'\\$X\\'\"", "eval \"gh pr create --title \\'\\$X\\'\""]) expect(unsafe(command)).toBe(true);
+  expect(invocations('echo "a\\b \\$c \\"d\\" \\\\e"')[0]!.args).toEqual(["a\\b $c \"d\" \\e"]);
+  expect(invocations('bash -c "echo \\# ; git push --force origin main"').map(call => call.program)).toEqual(["echo", "git"]);
   expect(invocations("cd 'a$b' && git status", "/work")[0]!.directory).toBe("/work/a$b");
   expect(invocations("cd \"a$b\" && git status", "/work")[0]!.directory).toBeUndefined();
   expect(invocations("git -C 'a`b`' status", "/work")[0]!.directory).toBe("/work/a`b`");

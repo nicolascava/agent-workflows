@@ -1,6 +1,6 @@
 # Workflow modes
 
-The target repository declares its delivery mode in `git-workflow.json` at the repository root. Commit this file as repository policy. Do not infer the mode from branch names, hosting settings or an earlier checkout.
+The target repository declares its delivery mode in `git-workflow.json` at the repository root. Commit this file as repository policy. Without the file, the mode is `pr`. Solo repositories must opt in with an explicit `solo-shaped-kanban` declaration. Do not infer the mode from branch names, hosting settings or an earlier checkout.
 
 ```json
 { "workflow": "pr" }
@@ -16,7 +16,7 @@ The target repository declares its delivery mode in `git-workflow.json` at the r
 | `pr`, `update-pr`, `apply-pr-feedback`, `execute-test-plan`, `merge` | Available | Refuse; use `land` for delivery |
 | `land` | Refuse; use `pr` and `merge` | Review, squash to one commit, push to base |
 
-Missing, malformed or unknown declarations allow read-only inspection. Stop before any mode-dependent mutation. Say: `Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.` Never create the declaration just to unblock delivery. Local commits and branch operations work in both modes, but pushes to the base always require the landing or merge workflow.
+An absent declaration resolves to `{"workflow":"pr"}` with the defaults below. A present declaration that is malformed, names an unknown workflow or has extra fields never falls back to a default. It allows read-only inspection only. Stop before any mode-dependent mutation. Say: `Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.` Never create the declaration just to unblock delivery. Local commits and branch operations work in both modes, but pushes to the base always require the landing or merge workflow.
 
 Two optional fields are supported. No other fields are accepted.
 
@@ -33,6 +33,6 @@ Run the installed helper from the target worktree:
 bun "${CLAUDE_PLUGIN_ROOT}/bin/workflow-mode.ts" --remote origin
 ```
 
-Select and confirm the remote first. `origin` is the helper's default remote name, not proof of its destination. Success prints one JSON object with `root`, `workflow`, `baseBranch`, `branchPrefix` and `remote`. This `workflow` field is separate from the verification helper's `mode`, which describes an evidence source. Failure prints no JSON and exits nonzero. A declaration must be a regular file below 64 KiB. A failed remote lookup never falls back to a cached default branch. The helper does not change the worktree or GitHub.
+Select and confirm the remote first. `origin` is the helper's default remote name, not proof of its destination. Without a declaration, it prints `"workflow":"pr"`. Success prints one JSON object with `root`, `workflow`, `baseBranch`, `branchPrefix` and `remote`. This `workflow` field is separate from the verification helper's `mode`, which describes an evidence source. Failure prints no JSON and exits nonzero. A declaration must be a regular file below 64 KiB. A failed remote lookup never falls back to a cached default branch. The helper does not change the worktree or GitHub.
 
 A Bun helper keeps validation, root resolution, live default discovery and prefix fallback identical across ten skills. A short `jq` expression would validate only the JSON and leave these safety decisions duplicated in each skill. Commands have time bounds and do not run through a shell.

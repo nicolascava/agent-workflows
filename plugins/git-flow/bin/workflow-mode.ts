@@ -5,7 +5,9 @@ import { join } from "node:path";
 const setup = 'Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.';
 const env = { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_NO_REPLACE_OBJECTS: "1", GIT_OPTIONAL_LOCKS: "0" };
 function command(args: string[]): string {
-  const r = Bun.spawnSync(args, { env, timeout: 10_000 });
+  let r;
+  try { r = Bun.spawnSync(args, { env, timeout: 10_000 }); }
+  catch { throw new Error(`${args[0]} command unavailable`); }
   if (r.exitCode !== 0) throw new Error(`cannot resolve ${args[0]} configuration`);
   return r.stdout.toString().trim();
 }
@@ -13,11 +15,12 @@ const git = (...args: string[]) => command(["git", "-c", "core.hooksPath=/dev/nu
 export type WorkflowDeclaration = { workflow: "pr" | "solo-shaped-kanban"; baseBranch?: string; branchPrefix?: string };
 
 // Hooks use declared values only. Identity and remote discovery stay in the CLI.
-export function readWorkflowDeclaration(root: string, optional = false): WorkflowDeclaration | undefined {
+// Only an absent file defaults to pr; anything present must be valid.
+export function readWorkflowDeclaration(root: string): WorkflowDeclaration {
   const path = join(root, "git-workflow.json");
   let stat;
   try { stat = lstatSync(path); } catch (error) {
-    if (optional && (error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { workflow: "pr" };
     throw error;
   }
   if (!stat.isFile() || stat.size > 65_536) throw new Error("declaration must be a regular JSON file below 64 KiB");
@@ -41,7 +44,7 @@ function main() {
   const remote = args[1] ?? "origin";
   if (git("rev-parse", "--is-inside-work-tree") !== "true") throw new Error("current directory must be a worktree");
   const root = realpathSync(git("rev-parse", "--show-toplevel"));
-  const config = readWorkflowDeclaration(root)!;
+  const config = readWorkflowDeclaration(root);
   let baseBranch = config.baseBranch;
   if (baseBranch === undefined) {
     const urls = git("remote", "get-url", "--all", remote).split("\n");
@@ -65,7 +68,8 @@ if (import.meta.main) {
   try { console.log(JSON.stringify(main())); }
   catch (error) {
     // Avoid echoing remote diagnostics, source JSON or paths that may contain secrets.
-    const message = error instanceof Error && !/ENOENT|JSON|position|Unexpected/i.test(error.message) ? error.message : "missing or invalid declaration";
+    const message = !(error instanceof Error) || error instanceof SyntaxError ? "invalid declaration"
+      : typeof (error as NodeJS.ErrnoException).code === "string" ? "cannot read declaration" : error.message;
     console.error(`workflow-mode: ${message}. ${setup}`); process.exitCode = 1;
   }
 }

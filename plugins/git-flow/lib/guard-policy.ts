@@ -8,7 +8,7 @@ import { rejectGitOverrides } from "./git-environment";
 import { invocations, type Invocation } from "./shell-commands";
 
 export const git = (cwd: string, ...args: string[]) => runBounded(["git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", ...args], { cwd, timeout: 800 }).then(s => s.trim());
-export type Repository = { root: string; config?: WorkflowDeclaration };
+export type Repository = { root: string; config: WorkflowDeclaration };
 export async function repository(payload: Record<string, unknown>, call?: Invocation): Promise<Repository> {
   rejectGitOverrides();
   if (payload.git_flow_repository_override) throw new Error("Repository-routing environment override");
@@ -18,7 +18,7 @@ export async function repository(payload: Record<string, unknown>, call?: Invoca
   const cwd = realpathSync(directory);
   if (await git(cwd, "rev-parse", "--is-inside-work-tree") !== "true") throw new Error("Not a worktree");
   const root = realpathSync(await git(cwd, "rev-parse", "--show-toplevel"));
-  return { root, config: readWorkflowDeclaration(root, true) };
+  return { root, config: readWorkflowDeclaration(root) };
 }
 export function commands(payload: Record<string, unknown>): Invocation[] {
   if (payload.tool_name !== "Bash") return [];
@@ -39,7 +39,7 @@ export async function guard(policy: (payload: Record<string, unknown>) => Promis
   try { await policy(await readHookInput()); } catch { deny(); }
 }
 export function baseBranch(repo: Repository): Promise<string> {
-  if (repo.config?.baseBranch) return Promise.resolve(repo.config.baseBranch);
+  if (repo.config.baseBranch) return Promise.resolve(repo.config.baseBranch);
   return git(repo.root, "symbolic-ref", "--short", "refs/remotes/origin/HEAD").then(value => {
     if (!value.startsWith("origin/")) throw new Error("Base branch unavailable"); return value.slice(7);
   });

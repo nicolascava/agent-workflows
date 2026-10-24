@@ -4,7 +4,7 @@ Read this before any mutation. The target repository's committed guidance, prote
 
 Use the current physical worktree. Inspect `git status --short`, the branch, `git worktree list`, the staged diff, unstaged diff and untracked paths. Do not move into a different checkout to obtain cleaner evidence. Reject repository-routing environment overrides. Do not stage secrets, credentials, generated output or unrelated user changes without specific authorization. Never stash, discard, reset or abort user work merely to make a gate pass.
 
-Resolve the root with `git rev-parse --show-toplevel`. Read `git-workflow.json` through the [mode helper](workflow-modes.md). A mode failure does not prevent read-only reports. Local branch work can continue when its scope is authorized and does not depend on the delivery mode. Base pushes and PR creation or merge stop until the declaration is valid.
+Resolve the root with `git rev-parse --show-toplevel`. Read `git-workflow.json` through the [mode helper](workflow-modes.md). A mode failure does not prevent read-only reports. Local branch work can continue when its scope is authorized and does not depend on the delivery mode. An absent declaration resolves to `pr`. Base pushes and PR creation or merge stop until a present declaration is valid.
 
 Select the remote from the repository's guidance and configuration. Confirm fetch and push destinations with `git remote get-url --all <remote>` and `git remote get-url --push --all <remote>`. Bind them to the same intended repository. Reject ambiguous multiple URLs, unexpected push URLs and unverified host or repository mappings. Use an explicit repository with every `gh` command. Never add a remote or change its URL as a workaround.
 

@@ -59,7 +59,7 @@ export async function run(payload: Record<string, unknown>) {
       const destination = (ref.includes(":") ? ref.slice(ref.indexOf(":") + 1) : ref).replace(/^\+/, "").replace(/^refs\/heads\//, "");
       return destination === base || destination === "HEAD" || destination.includes("*") || destination === "";
     });
-    if (touchesBase && (force || mirror || refs.some(r => r.startsWith("+")) || repo.config?.workflow !== "solo-shaped-kanban")) {
+    if (touchesBase && (force || mirror || refs.some(r => r.startsWith("+")) || repo.config.workflow !== "solo-shaped-kanban")) {
       deny("Base pushes require {\"workflow\":\"solo-shaped-kanban\"} in git-workflow.json and must not force or mirror updates."); return;
     }
   }

@@ -10,7 +10,7 @@ Read the target repository's root `git-workflow.json` when a step depends on del
 { "workflow": "solo-shaped-kanban" }
 ```
 
-| Operation | Missing or unknown mode | pr | solo-shaped-kanban |
+| Operation | Unknown or malformed mode | pr | solo-shaped-kanban |
 | --- | --- | --- | --- |
 | Read issues, scan replies, draft or review evidence | Available | Available | Available |
 | Requested issue creation, body edits, classification, hierarchy | Available with payload preview | Same | Same |
@@ -18,6 +18,6 @@ Read the target repository's root `git-workflow.json` when a step depends on del
 | Acceptance publication, shipped transition, delivery closure | Blocked | Acceptance gates required | Acceptance gates required |
 | Git delivery | No authority from issues | Optional `/git-flow:pr` | Optional `/git-flow:land` |
 
-Unknown declarations must be reported, not treated as a default. The small `lib/workflow-mode.ts` parser returns no mode for an absent declaration and rejects unsupported names. Before terminal changes, read the file afresh and require one of the recognized modes. A mode declaration never grants mutation authority.
+An absent declaration, meaning the file does not exist, is `pr`. Any other read failure, such as an unreadable file, a symlink or a directory, is reported as an unknown mode, never passed as absent. Unknown or malformed declarations must be reported, not treated as a default. The small `lib/workflow-mode.ts` parser returns `pr` for an absent declaration and rejects unsupported names. Before terminal changes, read the file afresh and require one of the recognized modes. A mode declaration never grants mutation authority.
 
 Both recognized modes use clean current-worktree evidence at the fetched delivery base for status and acceptance claims. An open PR head is not delivery evidence. Read [verification source](verification-source.md). If the git-flow plugin is installed, its own skills enforce Git delivery rules and approvals. This plugin does not read its files.

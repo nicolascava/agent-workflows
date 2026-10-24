@@ -34,9 +34,9 @@ const decision = (output: any) => output?.permissionDecision;
 describe("branch prefix guard", () => {
   for (const mode of [undefined, "pr", "solo-shaped-kanban"]) {
     for (const command of ["git switch -c claude/fix", "git checkout -b codex/fix", "git branch agent/fix", "git worktree add -b assistant/fix ../new", "git switch -c gemini-fix"]) {
-      test(`${mode ?? "undeclared"}: denies ${command}`, () => { const cwd = repo(mode, "developer"); expect(decision(hook("guard-branch-prefix", cwd, bash(cwd, command)))).toBe("deny"); });
+      test(`${mode ?? "undeclared (pr)"}: denies ${command}`, () => { const cwd = repo(mode, "developer"); expect(decision(hook("guard-branch-prefix", cwd, bash(cwd, command)))).toBe("deny"); });
     }
-    test(`${mode ?? "undeclared"}: contributor branch`, () => { const cwd = repo(mode, "developer"); expect(hook("guard-branch-prefix", cwd, bash(cwd, "git switch -c developer/fix-login"))).toBeUndefined(); });
+    test(`${mode ?? "undeclared (pr)"}: contributor branch`, () => { const cwd = repo(mode, "developer"); expect(hook("guard-branch-prefix", cwd, bash(cwd, "git switch -c developer/fix-login"))).toBeUndefined(); });
   }
   test("declared prefix is required, but a missing prefix is not inferred", () => {
     const cwd = repo("pr", "developer");
@@ -76,20 +76,20 @@ describe("branch prefix guard", () => {
 
 describe("GitHub creation guard", () => {
   for (const mode of [undefined, "pr", "solo-shaped-kanban"]) {
-    test(`${mode ?? "undeclared"}: repository asks, issues allowed, PR mode checked`, () => {
+    test(`${mode ?? "undeclared (pr)"}: repository asks, issues allowed, PR mode checked`, () => {
       const cwd = repo(mode);
       for (const command of ["gh repo create acme/widget", "gh --hostname github.com repo create widget"]) expect(decision(hook("guard-github-creation", cwd, bash(cwd, command)))).toBe("ask");
       expect(hook("guard-github-creation", cwd, bash(cwd, "gh issue create --title Example"))).toBeUndefined();
-      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh pr create --title Example")))).toBe(mode === "pr" ? undefined : "deny");
-      for (const [tool, expected] of [["mcp__github__create_repository", "ask"], ["mcp__github_enterprise__create_pull_request", mode === "pr" ? undefined : "deny"], ["mcp__github__create_issue", undefined]] as const) expect(decision(hook("guard-github-creation", cwd, { cwd, tool_name: tool, tool_input: { name: "widget" } }))).toBe(expected);
+      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh pr create --title Example")))).toBe(mode === "solo-shaped-kanban" ? "deny" : undefined);
+      for (const [tool, expected] of [["mcp__github__create_repository", "ask"], ["mcp__github_enterprise__create_pull_request", mode === "solo-shaped-kanban" ? "deny" : undefined], ["mcp__github__create_issue", undefined]] as const) expect(decision(hook("guard-github-creation", cwd, { cwd, tool_name: tool, tool_input: { name: "widget" } }))).toBe(expected);
     });
-    test(`${mode ?? "undeclared"}: repository opt-out skips only confirmation`, () => {
+    test(`${mode ?? "undeclared (pr)"}: repository opt-out skips only confirmation`, () => {
       const cwd = repo(mode), env = { AGENT_WORKFLOWS_ALLOW_REPO_CREATE: "1" };
       for (const command of ["gh repo create acme/widget", "gh --hostname github.com repo create widget", "gh api user/repos -X POST"]) {
         expect(hook("guard-github-creation", cwd, bash(cwd, command), env)).toBeUndefined();
       }
       expect(hook("guard-github-creation", cwd, { cwd, tool_name: "mcp__github__create_repository", tool_input: { name: "widget" } }, env)).toBeUndefined();
-      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh repo create acme/widget; gh pr create"), env))).toBe(mode === "pr" ? undefined : "deny");
+      expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh repo create acme/widget; gh pr create"), env))).toBe(mode === "solo-shaped-kanban" ? "deny" : undefined);
       writeFileSync(join(cwd, "git-workflow.json"), "{");
       expect(decision(hook("guard-github-creation", cwd, bash(cwd, "gh repo create acme/widget"), env))).toBe("deny");
     });
@@ -131,7 +131,7 @@ describe("GitHub creation guard", () => {
 
 describe("PR mutation guard", () => {
   for (const mode of [undefined, "pr", "solo-shaped-kanban"]) {
-    test(`${mode ?? "undeclared"}: merge override and base push`, () => {
+    test(`${mode ?? "undeclared (pr)"}: merge override and base push`, () => {
       const cwd = repo(mode);
       expect(decision(hook("guard-pr-mutation", cwd, bash(cwd, "gh pr merge 12 --admin")))).toBe("deny");
       for (const command of ["git push --force origin HEAD:trunk", "git push origin +HEAD:refs/heads/trunk", "git push --force-with-lease origin trunk", "git push --mirror origin"]) expect(decision(hook("guard-pr-mutation", cwd, bash(cwd, command)))).toBe("deny");

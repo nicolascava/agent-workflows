@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
 import { workflowMode } from "./workflow-mode.ts";
-test("keeps read operations available without a delivery mode", () => {
-  expect(workflowMode(undefined)).toEqual({ mode: null, deliveryMutations: false });
+test("treats an absent declaration as pr and rejects unknown modes", () => {
+  expect(workflowMode(undefined)).toEqual({ mode: "pr", deliveryMutations: true });
   expect(workflowMode({ workflow: "pr" }).mode).toBe("pr");
   expect(workflowMode({ workflow: "solo-shaped-kanban" }).deliveryMutations).toBe(true);
-  expect(() => workflowMode({ workflow: "unknown" })).toThrow();
+  for (const raw of [{ workflow: "unknown" }, {}, null, []]) expect(() => workflowMode(raw)).toThrow();
 });

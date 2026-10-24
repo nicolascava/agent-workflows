@@ -29,7 +29,7 @@ export async function run(payload: Record<string, unknown>) {
     const { config } = await repository(payload, call);
     for (const name of names) {
       if (!name || /^(?:claude|codex|gemini|agent|assistant|worktree)(?:[/-]|$)/i.test(name)) { deny("Use a contributor branch prefix, not an agent prefix."); return; }
-      if (config?.branchPrefix && !new RegExp(`^${config.branchPrefix}/[a-z0-9]+(?:-[a-z0-9]+)*$`).test(name)) { deny("Use the declared branchPrefix followed by a lowercase hyphenated slug."); return; }
+      if (config.branchPrefix && !new RegExp(`^${config.branchPrefix}/[a-z0-9]+(?:-[a-z0-9]+)*$`).test(name)) { deny("Use the declared branchPrefix followed by a lowercase hyphenated slug."); return; }
     }
   }
 }

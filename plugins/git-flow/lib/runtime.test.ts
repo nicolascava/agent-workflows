@@ -3,7 +3,7 @@ import { runBounded } from "./bounded-command";
 import { containsPath, localFile } from "./hook-runtime";
 import { readWorkflowDeclaration } from "../bin/workflow-mode";
 import { invocations } from "./shell-commands";
-import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync, symlinkSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -23,16 +23,21 @@ test("physical paths reject traversal and symlink escapes", () => {
     expect(() => localFile(root, "../file")).toThrow(); expect(() => localFile(root, "outside/file")).toThrow(); expect(() => localFile(root, "file", true)).toThrow();
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
-test("declaration reader is importable and does not discover defaults", () => {
+test("declaration reader treats an absent file as pr and does not discover defaults", () => {
   const root = mkdtempSync(join(tmpdir(), "git-flow-mode-"));
   try {
-    expect(readWorkflowDeclaration(root, true)).toBeUndefined();
-    expect(() => readWorkflowDeclaration(root)).toThrow();
+    expect(readWorkflowDeclaration(root)).toEqual({ workflow: "pr" });
     writeFileSync(join(root, "git-workflow.json"), '{"workflow":"pr"}');
     expect(readWorkflowDeclaration(root)).toEqual({ workflow: "pr" });
-    for (const text of ['{"workflow":"other"}', '{"workflow":"pr","extra":1}', '{"workflow":"pr","branchPrefix":"claude"}', '{"workflow":"pr","baseBranch":"../bad"}', "["]) {
+    for (const text of ['{"workflow":"other"}', '{}', '{"workflow":"pr","extra":1}', '{"workflow":"pr","branchPrefix":"claude"}', '{"workflow":"pr","baseBranch":"../bad"}', "["]) {
       writeFileSync(join(root, "git-workflow.json"), text); expect(() => readWorkflowDeclaration(root)).toThrow();
     }
+    rmSync(join(root, "git-workflow.json"));
+    writeFileSync(join(root, "target.json"), '{"workflow":"pr"}');
+    symlinkSync(join(root, "target.json"), join(root, "git-workflow.json"));
+    expect(() => readWorkflowDeclaration(root)).toThrow();
+    rmSync(join(root, "git-workflow.json")); mkdirSync(join(root, "git-workflow.json"));
+    expect(() => readWorkflowDeclaration(root)).toThrow();
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

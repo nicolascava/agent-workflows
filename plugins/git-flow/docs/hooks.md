@@ -7,18 +7,22 @@ Each guarded call must resolve a physical Git worktree. Invalid declarations,
 repository-routing overrides and dynamic guarded arguments deny the call.
 Unrelated tools and commands emit no decision. An empty result leaves normal permissions in place.
 
-| Operation | `pr` | `solo-shaped-kanban` | No declaration |
-| --- | --- | --- | --- |
-| Agent-prefixed branch creation | deny | deny | deny |
-| Contributor branch, matching a declared prefix | allow | allow | allow |
-| Wrong declared branch prefix or slug | deny | deny | no prefix gate |
-| Repository creation | ask | ask | ask |
-| PR creation | allow | deny | deny |
-| Issue creation | allow | allow | allow |
-| Admin merge override | deny | deny | deny |
-| Force or mirror push touching the base | deny | deny | deny |
-| Direct base push | deny | allow | deny |
-| Explicit feature push or ordinary PR mutation | allow | allow | allow |
+A repository without `git-workflow.json` is treated as `pr`.
+
+| Operation | `pr` | `solo-shaped-kanban` |
+| --- | --- | --- |
+| Agent-prefixed branch creation | deny | deny |
+| Contributor branch, matching a declared prefix | allow | allow |
+| Wrong declared branch prefix or slug | deny | deny |
+| Repository creation | ask | ask |
+| PR creation | allow | deny |
+| Issue creation | allow | allow |
+| Admin merge override | deny | deny |
+| Force or mirror push touching the base | deny | deny |
+| Direct base push | deny | allow |
+| Explicit feature push or ordinary PR mutation | allow | allow |
+
+Without a declared `branchPrefix`, there is no prefix gate.
 
 Allow means the hook emits no decision. Other permissions and skill gates still apply.
 If you run your own repository-creation guard, set

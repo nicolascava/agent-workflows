@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { chmodSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -59,8 +59,13 @@ test("resolves a linked worktree from its own declaration", () => {
   const r = f.run([], {}, linked); expect(r.exitCode).toBe(0);
   expect(JSON.parse(r.stdout.toString()).root).toBe(linked);
 });
-test("fails closed for absent, invalid, unknown and incomplete declarations", () => {
-  const f = fixture(); fail(f.run());
+test("resolves an absent declaration as pr with live discovery", () => {
+  const f = fixture(); const r = f.run();
+  expect(r.exitCode).toBe(0);
+  expect(JSON.parse(r.stdout.toString())).toEqual({ root: f.root, workflow: "pr", baseBranch: "trunk", branchPrefix: "developer", remote: "origin" });
+});
+test("fails closed for invalid, unknown and incomplete declarations", () => {
+  const f = fixture();
   for (const data of [{}, { workflow: "other" }, [], null, { workflow: "pr", extra: true }, { workflow: "pr", baseBranch: "HEAD" }, { workflow: "pr", baseBranch: "main:other" }, { workflow: "pr", branchPrefix: "" }]) {
     f.config(data); fail(f.run());
   }
@@ -80,6 +85,24 @@ test("accepts a selected remote and rejects unknown or duplicate options", () =>
   const f = fixture(); f.config({ workflow: "pr" }); f.git("remote", "rename", "origin", "upstream");
   expect(f.run(["--remote", "upstream"]).exitCode).toBe(0);
   for (const args of [["--other"], ["--remote"], ["--remote", "upstream", "--remote", "upstream"], ["--remote", "--all"]]) fail(f.run(args));
+});
+test("reports a missing command instead of an invalid declaration", () => {
+  const f = fixture(); f.config({ workflow: "pr" });
+  const r = f.run([], { PATH: join(f.root, "fake-bin") }); fail(r);
+  expect(r.stderr.toString()).toContain("command unavailable");
+  expect(r.stderr.toString()).not.toContain("invalid declaration");
+});
+test("fails closed for a symlinked or directory declaration", () => {
+  const f = fixture();
+  writeFileSync(join(f.root, "target.json"), '{"workflow":"pr"}');
+  symlinkSync(join(f.root, "target.json"), join(f.root, "git-workflow.json")); fail(f.run());
+  rmSync(join(f.root, "git-workflow.json")); mkdirSync(join(f.root, "git-workflow.json")); fail(f.run());
+});
+test("reports an unreadable declaration without echoing its path", () => {
+  const f = fixture(); f.config({ workflow: "pr" }); chmodSync(join(f.root, "git-workflow.json"), 0);
+  const r = f.run(); fail(r);
+  expect(r.stderr.toString()).toContain("cannot read declaration");
+  expect(r.stderr.toString()).not.toContain(f.root);
 });
 test("rejects repository routing overrides", () => {
   const f = fixture(); f.config({ workflow: "pr" }); fail(f.run([], { GIT_WORK_TREE: f.root }));

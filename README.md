@@ -43,7 +43,7 @@ Commands carry the plugin name, such as `/core:tdd` or `/git-flow:pr`. Agents do
 
 ## Setup
 
-Declare how changes land in a root `git-workflow.json`. Use `{ "workflow": "pr" }` for pull requests, or `{ "workflow": "solo-shaped-kanban" }` to land reviewed work as one squashed commit through `land`. Without a known mode, `git-flow` stops before any step that depends on it. [Workflow modes](plugins/git-flow/docs/workflow-modes.md) covers the optional `baseBranch` and `branchPrefix` settings.
+Declare how changes land in a root `git-workflow.json`. Use `{ "workflow": "pr" }` for pull requests, or `{ "workflow": "solo-shaped-kanban" }` to land reviewed work as one squashed commit through `land`. Without the file, the mode is `pr`. With a malformed or unknown declaration, `git-flow` stops before any step that depends on it. [Workflow modes](plugins/git-flow/docs/workflow-modes.md) covers the optional `baseBranch` and `branchPrefix` settings.
 
 `issues` reads board names, options, and issue types from [`issue-workflow.json`](plugins/issues/docs/configuration.md). Without a board, it uses plain issues.
 

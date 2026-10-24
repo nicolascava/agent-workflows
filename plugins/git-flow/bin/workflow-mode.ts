@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
-import { lstatSync, readFileSync, realpathSync } from "node:fs";
+import { closeSync, constants, fstatSync, openSync, readSync, realpathSync } from "node:fs";
 import { join } from "node:path";
 
 const setup = 'Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.';
 const env = { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_NO_REPLACE_OBJECTS: "1", GIT_OPTIONAL_LOCKS: "0" };
+class CommandUnavailable extends Error {}
 function command(args: string[]): string {
   let r;
   try { r = Bun.spawnSync(args, { env, timeout: 10_000 }); }
-  catch { throw new Error(`${args[0]} command unavailable`); }
+  catch { throw new CommandUnavailable(`${args[0]} command unavailable`); }
   if (r.exitCode !== 0) throw new Error(`cannot resolve ${args[0]} configuration`);
   return r.stdout.toString().trim();
 }
@@ -18,13 +19,23 @@ export type WorkflowDeclaration = { workflow: "pr" | "solo-shaped-kanban"; baseB
 // Only an absent file defaults to pr; anything present must be valid.
 export function readWorkflowDeclaration(root: string): WorkflowDeclaration {
   const path = join(root, "git-workflow.json");
-  let stat;
-  try { stat = lstatSync(path); } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { workflow: "pr" };
+  const irregular = "declaration must be a regular JSON file below 64 KiB";
+  // One descriptor, opened without following links, so the checked file is the one read.
+  let fd;
+  try { fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK); } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return { workflow: "pr" };
+    if (code === "ELOOP" || code === "EMLINK") throw new Error(irregular);
     throw error;
   }
-  if (!stat.isFile() || stat.size > 65_536) throw new Error("declaration must be a regular JSON file below 64 KiB");
-  const config = JSON.parse(readFileSync(path, "utf8"));
+  const buffer = Buffer.alloc(65_537);
+  let length;
+  try {
+    if (!fstatSync(fd).isFile()) throw new Error(irregular);
+    length = readSync(fd, buffer, 0, buffer.length, 0);
+  } finally { closeSync(fd); }
+  if (length > 65_536) throw new Error(irregular);
+  const config = JSON.parse(buffer.toString("utf8", 0, length));
   if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(k => !["workflow", "baseBranch", "branchPrefix"].includes(k))) throw new Error("invalid declaration schema");
   if (!["pr", "solo-shaped-kanban"].includes(config.workflow)) throw new Error("unknown workflow");
   if (config.baseBranch !== undefined) {
@@ -43,8 +54,15 @@ function main() {
   if (args.length && (args.length !== 2 || args[0] !== "--remote" || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(args[1]!))) throw new Error("usage: workflow-mode.ts [--remote <name>]");
   const remote = args[1] ?? "origin";
   if (git("rev-parse", "--is-inside-work-tree") !== "true") throw new Error("current directory must be a worktree");
-  const root = realpathSync(git("rev-parse", "--show-toplevel"));
-  const config = readWorkflowDeclaration(root);
+  const top = git("rev-parse", "--show-toplevel");
+  let root;
+  try { root = realpathSync(top); } catch { throw new Error("cannot resolve repository root"); }
+  let config;
+  try { config = readWorkflowDeclaration(root); }
+  catch (error) {
+    if (error instanceof Error && !(error instanceof CommandUnavailable)) Object.assign(error, { declaration: true });
+    throw error;
+  }
   let baseBranch = config.baseBranch;
   if (baseBranch === undefined) {
     const urls = git("remote", "get-url", "--all", remote).split("\n");
@@ -70,6 +88,8 @@ if (import.meta.main) {
     // Avoid echoing remote diagnostics, source JSON or paths that may contain secrets.
     const message = !(error instanceof Error) || error instanceof SyntaxError ? "invalid declaration"
       : typeof (error as NodeJS.ErrnoException).code === "string" ? "cannot read declaration" : error.message;
-    console.error(`workflow-mode: ${message}. ${setup}`); process.exitCode = 1;
+    // Only a bad declaration is fixed by editing it; other failures get no setup hint.
+    const hint = (error as { declaration?: boolean }).declaration ? ` ${setup}` : "";
+    console.error(`workflow-mode: ${message}.${hint}`); process.exitCode = 1;
   }
 }

@@ -29,9 +29,11 @@ function fixture() {
   const run = (args: string[] = [], extra: Record<string, string> = {}, cwd = root) => Bun.spawnSync([process.execPath, helper, ...args], { cwd, env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, ...extra } });
   return { root, git, config, run };
 }
-function fail(r: ReturnType<ReturnType<typeof fixture>["run"]>) {
+// Only declaration failures carry the setup hint; command and remote failures do not.
+function fail(r: ReturnType<ReturnType<typeof fixture>["run"]>, hint = true) {
   expect(r.exitCode).not.toBe(0); expect(r.stdout.toString()).toBe("");
-  expect(r.stderr.toString()).toContain("git-workflow.json");
+  if (hint) expect(r.stderr.toString()).toContain("git-workflow.json");
+  else expect(r.stderr.toString()).not.toContain("git-workflow.json");
 }
 test("resolves both declarations with live remote default and authenticated prefix", () => {
   const f = fixture();
@@ -75,20 +77,20 @@ test("rejects agent branch prefixes from every source", () => {
   const f = fixture();
   for (const name of ["claude", "codex", "gemini", "agent", "worktree-123"]) {
     f.config({ workflow: "pr", branchPrefix: name }); fail(f.run());
-    f.config({ workflow: "pr" }); fail(f.run([], { FAKE_LOGIN: name }));
+    f.config({ workflow: "pr" }); fail(f.run([], { FAKE_LOGIN: name }), false);
   }
 });
 test("fails when no remote default can be verified instead of guessing main", () => {
-  const f = fixture(); f.config({ workflow: "pr" }); f.git("remote", "remove", "origin"); fail(f.run());
+  const f = fixture(); f.config({ workflow: "pr" }); f.git("remote", "remove", "origin"); fail(f.run(), false);
 });
 test("accepts a selected remote and rejects unknown or duplicate options", () => {
   const f = fixture(); f.config({ workflow: "pr" }); f.git("remote", "rename", "origin", "upstream");
   expect(f.run(["--remote", "upstream"]).exitCode).toBe(0);
-  for (const args of [["--other"], ["--remote"], ["--remote", "upstream", "--remote", "upstream"], ["--remote", "--all"]]) fail(f.run(args));
+  for (const args of [["--other"], ["--remote"], ["--remote", "upstream", "--remote", "upstream"], ["--remote", "--all"]]) fail(f.run(args), false);
 });
 test("reports a missing command instead of an invalid declaration", () => {
   const f = fixture(); f.config({ workflow: "pr" });
-  const r = f.run([], { PATH: join(f.root, "fake-bin") }); fail(r);
+  const r = f.run([], { PATH: join(f.root, "fake-bin") }); fail(r, false);
   expect(r.stderr.toString()).toContain("command unavailable");
   expect(r.stderr.toString()).not.toContain("invalid declaration");
 });
@@ -97,13 +99,23 @@ test("fails closed for a symlinked or directory declaration", () => {
   writeFileSync(join(f.root, "target.json"), '{"workflow":"pr"}');
   symlinkSync(join(f.root, "target.json"), join(f.root, "git-workflow.json")); fail(f.run());
   rmSync(join(f.root, "git-workflow.json")); mkdirSync(join(f.root, "git-workflow.json")); fail(f.run());
+  rmSync(join(f.root, "git-workflow.json"), { recursive: true });
+  expect(Bun.spawnSync(["mkfifo", join(f.root, "git-workflow.json")]).exitCode).toBe(0); fail(f.run());
 });
-test("reports an unreadable declaration without echoing its path", () => {
+// Root can read a mode-0 file, so this check only means something for other users.
+test.skipIf(process.getuid?.() === 0)("reports an unreadable declaration without echoing its path", () => {
   const f = fixture(); f.config({ workflow: "pr" }); chmodSync(join(f.root, "git-workflow.json"), 0);
   const r = f.run(); fail(r);
   expect(r.stderr.toString()).toContain("cannot read declaration");
   expect(r.stderr.toString()).not.toContain(f.root);
 });
+test("labels an unresolvable repository root without the setup hint", () => {
+  const f = fixture(); const shim = join(f.root, "shim-bin"); mkdirSync(shim);
+  writeFileSync(join(shim, "git"), '#!/bin/sh\ncase "$*" in *--is-inside-work-tree*) echo true;; *--show-toplevel*) echo /nonexistent-workflow-mode-root;; *) exit 1;; esac\n');
+  chmodSync(join(shim, "git"), 0o755);
+  const r = f.run([], { PATH: `${shim}:${process.env.PATH}` }); fail(r, false);
+  expect(r.stderr.toString()).toContain("cannot resolve repository root");
+});
 test("rejects repository routing overrides", () => {
-  const f = fixture(); f.config({ workflow: "pr" }); fail(f.run([], { GIT_WORK_TREE: f.root }));
+  const f = fixture(); f.config({ workflow: "pr" }); fail(f.run([], { GIT_WORK_TREE: f.root }), false);
 });

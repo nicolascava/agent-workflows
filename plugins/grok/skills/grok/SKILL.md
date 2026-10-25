@@ -25,12 +25,15 @@ Use public web research only. Never send secrets, credentials, private code,
 customer names, or personal data to the provider. Exclude private context from
 Claude's findings too.
 
-Run Grok with `--permission-mode plan`, its read-only mode. Never pass another
-permission mode or enable automatic tool approval. Use an empty working
-directory and restrict the task to web search. This is not an operating system
-sandbox. Do not use configuration or external
-tools that allow file access, shell commands, or repository access without
-approval. Stop if the task would need those capabilities.
+Grok configuration documents no approval setting. Approval is set per run by flags.
+This skill always passes `--permission-mode plan`, its read-only mode, and never
+an auto-approve flag, tool allow rules, or another permission mode.
+The run is headless, so interactive approval toggles cannot apply.
+Use an empty working directory and restrict the task to web search.
+This is not an operating system sandbox.
+Do not use external tools (MCP servers) that allow file access, shell commands,
+or repository access without approval.
+Stop if the task would need those capabilities.
 
 ## Resolve the CLI and check sign-in
 

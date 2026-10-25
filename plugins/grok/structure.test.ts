@@ -37,9 +37,14 @@ test("installed paths stay in the plugin and exist", () => {
 
 test("skill contains no approval bypass flags", () => {
   const skill = readFileSync(resolve(root, "skills/grok/SKILL.md"), "utf8");
-  for (const flag of ["--always-approve", "--yolo", "approval-mode yolo", "approval-mode=yolo", "auto_edit", "bypassPermissions", "acceptEdits", "dontAsk"]) {
+  for (const flag of ["--allow", "--always-approve", "--yolo", "/yolo", "approval-mode yolo", "approval-mode=yolo", "auto_edit", "bypassPermissions", "acceptEdits", "dontAsk", "--permission-mode auto", "--permission-mode default"]) {
     expect(skill).not.toContain(flag);
   }
+});
+
+test("setup explains that configuration documents no approval setting", () => {
+  const setup = readFileSync(resolve(root, "docs/grok-setup.md"), "utf8");
+  expect(setup).toContain("Grok configuration documents no approval setting.");
 });
 
 test("skill runs Grok in plan mode with the prompt off argv", () => {

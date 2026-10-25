@@ -4,7 +4,8 @@
     "quality": [
       ["bun", "test"],
       ["bun", "scripts/leak-scan.ts"],
-      ["bun", "run", "validate"]
+      ["bun", "run", "validate"],
+      ["gitleaks", "git", "--no-banner", "--redact"]
     ],
     "deploy": "push-triggered"
   }

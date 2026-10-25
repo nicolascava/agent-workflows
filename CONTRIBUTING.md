@@ -20,11 +20,14 @@ git add <files>
 bun test
 bun scripts/leak-scan.ts
 bun run validate
+gitleaks git --no-banner --redact
 git diff --cached --check
 ```
 
 Validation checks the marketplace and every plugin.
-CI also runs Gitleaks on the repository history.
+The land gate runs Gitleaks on the full repository history.
+CI scans pushed and pull request commits.
+The local check needs [Gitleaks installed](https://github.com/gitleaks/gitleaks).
 
 The canonical verification-source contract is
 `plugins/core/docs/verification-source.md`. Edit it and copy the exact bytes to

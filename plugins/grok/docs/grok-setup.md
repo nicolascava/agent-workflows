@@ -20,8 +20,14 @@ Select a model through CLI configuration or the skill's `--model` argument.
 The CLI must support `--prompt-file`, `--permission-mode plan`,
 `--output-format json`, `--cwd`, and `--no-auto-update`. The skill runs in plan
 mode, which is read-only, from an empty private scratch working directory. This
-is not an operating system sandbox. Review CLI configuration and external tools
-so they cannot access files or repositories.
+is not an operating system sandbox.
+
+Grok configuration documents no approval setting. Approval is set per run by flags.
+This skill always passes `--permission-mode plan` and never an auto-approve flag,
+tool allow rules, or another permission mode.
+The run is headless, so interactive approval toggles cannot apply.
+Do not use external tools (MCP servers) that allow file access, shell commands,
+or repository access without approval.
 
 The prompt is read from a private file, not argv. Send only public research
 context. Do not include secrets or personal data. Each call reports its cost.

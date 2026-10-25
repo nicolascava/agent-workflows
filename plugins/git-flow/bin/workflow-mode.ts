@@ -13,7 +13,12 @@ function command(args: string[]): string {
   return r.stdout.toString().trim();
 }
 const git = (...args: string[]) => command(["git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", ...args]);
-export type WorkflowDeclaration = { workflow: "pr" | "solo-shaped-kanban"; baseBranch?: string; branchPrefix?: string };
+export type WorkflowDeclaration = {
+  workflow: "pr" | "solo-shaped-kanban";
+  baseBranch?: string;
+  branchPrefix?: string;
+  land?: { quality?: string[][]; deploy?: "nca-deploy-worker" | "push-triggered" };
+};
 
 // Hooks use declared values only. Identity and remote discovery stay in the CLI.
 // Only an absent file defaults to pr; anything present must be valid.
@@ -36,13 +41,22 @@ export function readWorkflowDeclaration(root: string): WorkflowDeclaration {
   } finally { closeSync(fd); }
   if (length > 65_536) throw new Error(irregular);
   const config = JSON.parse(buffer.toString("utf8", 0, length));
-  if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(k => !["workflow", "baseBranch", "branchPrefix"].includes(k))) throw new Error("invalid declaration schema");
+  if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(k => !["workflow", "baseBranch", "branchPrefix", "land"].includes(k))) throw new Error("invalid declaration schema");
   if (!["pr", "solo-shaped-kanban"].includes(config.workflow)) throw new Error("unknown workflow");
   if (config.baseBranch !== undefined) {
     if (typeof config.baseBranch !== "string" || config.baseBranch === "HEAD" || config.baseBranch.startsWith("refs/")) throw new Error("baseBranch must be a branch name");
     git("check-ref-format", `refs/heads/${config.baseBranch}`);
   }
   if (config.branchPrefix !== undefined && (typeof config.branchPrefix !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.branchPrefix) || /^(?:claude|codex|gemini|agent|assistant)(?:-|$)|^worktree(?:-|$)/i.test(config.branchPrefix))) throw new Error("branchPrefix must identify a contributor, not an agent");
+  if (config.land !== undefined) {
+    const land = config.land;
+    if (!land || typeof land !== "object" || Array.isArray(land) || Object.keys(land).some(k => !["quality", "deploy"].includes(k))) throw new Error("invalid land schema");
+    if (land.quality !== undefined && (
+      !Array.isArray(land.quality) || land.quality.length === 0 ||
+      land.quality.some((argv: unknown) => !Array.isArray(argv) || argv.length === 0 || argv.some(arg => typeof arg !== "string" || arg.length === 0))
+    )) throw new Error("land.quality must contain non-empty argument arrays of non-empty strings");
+    if (land.deploy !== undefined && !["nca-deploy-worker", "push-triggered"].includes(land.deploy)) throw new Error("unknown land.deploy");
+  }
   return config as WorkflowDeclaration;
 }
 

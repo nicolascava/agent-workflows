@@ -45,6 +45,18 @@
       "category": "integration"
     },
     {
+      "name": "gemini",
+      "source": "./plugins/gemini",
+      "description": "Opt-in Antigravity CLI integration for Gemini web research cross-checks.",
+      "category": "integration"
+    },
+    {
+      "name": "grok",
+      "source": "./plugins/grok",
+      "description": "Opt-in Grok CLI integration for web research cross-checks.",
+      "category": "integration"
+    },
+    {
       "name": "specialists",
       "source": "./plugins/specialists",
       "description": "Specialist agents for focused engineering advice and review.",

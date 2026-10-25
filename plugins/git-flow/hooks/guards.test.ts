@@ -130,6 +130,11 @@ describe("GitHub creation guard", () => {
 });
 
 describe("PR mutation guard", () => {
+  test("land settings do not deny an otherwise allowed git push", () => {
+    const cwd = repo("solo-shaped-kanban");
+    writeFileSync(join(cwd, "git-workflow.json"), JSON.stringify({ workflow: "solo-shaped-kanban", baseBranch: "trunk", land: { quality: [["bun", "test"]], deploy: "push-triggered" } }));
+    expect(hook("guard-pr-mutation", cwd, bash(cwd, "git push origin HEAD:trunk"))).toBeUndefined();
+  });
   for (const mode of [undefined, "pr", "solo-shaped-kanban"]) {
     test(`${mode ?? "undeclared (pr)"}: merge override and base push`, () => {
       const cwd = repo(mode);

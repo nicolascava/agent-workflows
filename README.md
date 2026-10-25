@@ -14,6 +14,8 @@ Run these commands in Claude Code, keeping only the plugins you want:
 /plugin install audits@agent-workflows
 /plugin install web-qa@agent-workflows
 /plugin install codex@agent-workflows
+/plugin install gemini@agent-workflows
+/plugin install grok@agent-workflows
 /plugin install specialists@agent-workflows
 ```
 
@@ -29,6 +31,8 @@ You need Claude Code, `git`, `gh`, `bun`, and `jq`.
 | `audits` | Read-only audits of security, debt, code, docs, and design. | Nothing else |
 | `web-qa` | Browser tests, visual checks, demo videos, interface design, and CI setup. | Nothing else |
 | `codex` | Hands a bounded task to the Codex CLI. | Codex CLI signed in with ChatGPT |
+| `gemini` | Cross-checks completed web research with Antigravity CLI. | Antigravity CLI (`agy`) signed in with Google |
+| `grok` | Cross-checks completed web research with the Grok CLI. | Official Grok CLI signed in with a subscription |
 | `specialists` | Focused agents for engineering advice, implementation, and review. | Nothing else |
 
 Commands carry the plugin name, such as `/core:tdd` or `/git-flow:pr`. Agents do too, such as `specialists:code-reviewer`.
@@ -39,6 +43,8 @@ Commands carry the plugin name, such as `/core:tdd` or `/git-flow:pr`. Agents do
 - `audits`: `security-audit`, `debt-audit`, `domain-audit`, `soc2-readiness-audit`, `code-quality-audit`, `codebase-review`, `documentation-review`, `design-review`, `frontend-review`, `figma-review`, and `team-health-analysis`.
 - `web-qa`: `webapp-testing`, `visual-regression`, `e2e-video`, `walkthrough-video`, `interface-design`, and `setup-ci`.
 - `codex`: `codex`.
+- `gemini`: `gemini`.
+- `grok`: `grok`.
 - `specialists`: `api-engineer`, `backend-engineer`, `code-reviewer`, `context-engineer`, `copy-editor`, `dba`, `economy-researcher`, `frontend-engineer`, `infrastructure-engineer`, `integration-and-rollout-reviewer`, `model-policy-reviewer`, `product-prioritization-assistant`, `repository-librarian`, `technical-writer`, `test-designer`, `triager`, `ui-designer`, and `ux-designer`.
 
 ## Setup
@@ -49,6 +55,8 @@ Declare how changes land in a root `git-workflow.json`. Use `{ "workflow": "pr" 
 
 Installing `codex` does not configure Codex. The [Codex setup guide](plugins/codex/docs/codex-setup.md) covers sign-in and settings.
 
+Installing `gemini` or `grok` does not configure or install its CLI. Each needs Bash and `jq`. The [Gemini setup guide](plugins/gemini/docs/gemini-setup.md) covers Antigravity CLI sign-in. The [Grok setup guide](plugins/grok/docs/grok-setup.md) covers subscription sign-in. Both skills remove API-key overrides.
+
 `web-qa` videos need `ffmpeg` and `ffprobe`. Figma review needs a Figma URL and the Figma MCP server.
 
 ## Safety
@@ -58,6 +66,9 @@ Installing `codex` does not configure Codex. The [Codex setup guide](plugins/cod
 - Audit reports stay in the conversation unless you pick a file path.
 - Tools are never installed without your request and a preview of the command.
 - `codex` is read-only by default. `--write` turns off the filesystem sandbox.
+- `gemini` and `grok` only cross-check public web research Claude has already done. They grant no repository access or write mode and never auto-approve tools. Temporary research files are removed after the run.
+- `gemini` and `grok` run in read-only plan mode from an empty private directory. This is not an operating system sandbox, so review each CLI's own configuration.
+- Never send secrets, credentials, private code, customer names, or personal data to research providers. Claude checks cited URLs before relying on provider output.
 - SOC 2 readiness is a technical review, not an attestation.
 
 ## Hooks

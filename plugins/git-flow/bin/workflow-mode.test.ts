@@ -50,6 +50,36 @@ test("uses the repository root from a nested directory and explicit settings", (
   expect(r.exitCode).toBe(0);
   expect(JSON.parse(r.stdout.toString())).toMatchObject({ baseBranch: "release/stable", branchPrefix: "maintainer" });
 });
+test("accepts a full land declaration without changing the helper output", () => {
+  const f = fixture();
+  f.config({ workflow: "solo-shaped-kanban", land: { quality: [["bun", "test"], ["bun", "scripts/leak-scan.ts"], ["bun", "run", "validate"]], deploy: "push-triggered" } });
+  const r = f.run();
+  expect(r.stderr.toString()).toBe("");
+  expect(r.exitCode).toBe(0);
+  expect(JSON.parse(r.stdout.toString())).toEqual({ root: f.root, workflow: "solo-shaped-kanban", baseBranch: "trunk", branchPrefix: "developer", remote: "origin" });
+});
+test("accepts land with only deploy, only quality or no settings", () => {
+  const f = fixture();
+  for (const land of [{ deploy: "nca-deploy-worker" }, { deploy: "push-triggered" }, { quality: [["bun", "test"]] }, {}]) {
+    f.config({ workflow: "pr", land });
+    const r = f.run();
+    expect(r.stderr.toString()).toBe("");
+    expect(r.exitCode).toBe(0);
+    expect(JSON.parse(r.stdout.toString())).toEqual({ root: f.root, workflow: "pr", baseBranch: "trunk", branchPrefix: "developer", remote: "origin" });
+  }
+});
+for (const [name, land] of Object.entries({
+  array: [], null: null, string: "land", "unknown key": { extra: true },
+  "empty quality": { quality: [] }, "non-array quality": { quality: "bun test" },
+  "null quality": { quality: null }, "empty argv": { quality: [[]] },
+  "non-array argv": { quality: ["bun"] }, "null argv": { quality: [null] },
+  "non-string argument": { quality: [["bun", 1]] }, "empty argument": { quality: [["bun", ""]] },
+  "unknown deploy": { deploy: "other" }, "null deploy": { deploy: null },
+})) {
+  test(`rejects land with ${name}`, () => {
+    const f = fixture(); f.config({ workflow: "pr", land }); fail(f.run());
+  });
+}
 test("falls back to a slug of the Git author when gh is unavailable", () => {
   const f = fixture(); f.config({ workflow: "pr" });
   const r = f.run([], { FAKE_GH_FAIL: "1" }); expect(r.exitCode).toBe(0);

@@ -1,1 +1,11 @@
-{ "workflow": "solo-shaped-kanban" }
+{
+  "workflow": "solo-shaped-kanban",
+  "land": {
+    "quality": [
+      ["bun", "test"],
+      ["bun", "scripts/leak-scan.ts"],
+      ["bun", "run", "validate"]
+    ],
+    "deploy": "push-triggered"
+  }
+}

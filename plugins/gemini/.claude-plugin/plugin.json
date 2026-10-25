@@ -1,0 +1,11 @@
+{
+  "name": "gemini",
+  "description": "Opt-in Antigravity CLI integration for Gemini web research cross-checks.",
+  "license": "MIT",
+  "keywords": [
+    "gemini",
+    "cli",
+    "integration",
+    "web-research"
+  ]
+}

@@ -18,12 +18,13 @@ The target repository declares its delivery mode in `git-workflow.json` at the r
 
 An absent declaration resolves to `{"workflow":"pr"}` with the defaults below. A present declaration that is malformed, names an unknown workflow or has extra fields never falls back to a default. It allows read-only inspection only. Stop before any mode-dependent mutation. Say: `Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.` Never create the declaration just to unblock delivery. Local commits and branch operations work in both modes, but pushes to the base always require the landing or merge workflow.
 
-Two optional fields are supported. No other fields are accepted.
+Three optional fields are supported. No other fields are accepted.
 
 | Field | Use | Default |
 | --- | --- | --- |
 | `baseBranch` | Base branch name for new work and delivery | The selected remote's live default branch, read with `git ls-remote --symref <remote> HEAD` |
 | `branchPrefix` | Contributor prefix in `<prefix>/<short-description>` | The authenticated `gh` login, else a lowercase slug of `git config user.name` |
+| `land` | Optional object validated for the NCA landing tool. Not used by git-flow. | Absent |
 
 `baseBranch` is a branch name, not an OID, tag or revision expression. `branchPrefix` uses lowercase letters, digits and single hyphens. Agent prefixes, including `claude`, `codex`, `gemini`, `agent`, `assistant` and `worktree`, are rejected, including variants with a hyphen suffix. A feature branch's full name must also pass `git check-ref-format --branch`. Do not treat this naming rule as proof of authorship.
 

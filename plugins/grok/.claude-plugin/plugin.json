@@ -1,0 +1,11 @@
+{
+  "name": "grok",
+  "description": "Opt-in Grok CLI integration for web research cross-checks.",
+  "license": "MIT",
+  "keywords": [
+    "grok",
+    "cli",
+    "integration",
+    "web-research"
+  ]
+}

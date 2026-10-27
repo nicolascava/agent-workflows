@@ -93,9 +93,12 @@ Matching does not prove task ownership. Review candidates in shared worktrees.
 Approved candidates receive TERM, then KILL if still alive after the grace period.
 
 Read-only delegation is the default. The skill's explicit `--write` option uses
+`workspace-write`, which limits writes to the worktree, `/tmp`, and `$TMPDIR`.
+In a linked Git worktree, Codex cannot commit because the Git directory is
+outside the writable roots. The separate `--full-access` option uses
 `danger-full-access`, which removes the filesystem sandbox and can allow network
-access. It provides no repository guard hooks. Review the task and this risk
-before opting in. Writes still need verification after the run.
+access. Neither option provides repository guard hooks. Review the task and
+these risks before opting in. Writes still need verification after the run.
 
 ## References
 

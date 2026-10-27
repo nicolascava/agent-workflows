@@ -21,6 +21,14 @@ test("Codex skill has valid front matter and the namespaced entry point", () => 
   expect(skill).toContain("/codex:codex");
 });
 
+test("Codex write modes map to the intended sandboxes", () => {
+  const skill = readFileSync(resolve(root, "skills/codex/SKILL.md"), "utf8");
+  expect(skill).toContain("`--write` selects `workspace-write`.");
+  expect(skill).toContain("`--full-access` selects `danger-full-access`.");
+  expect(skill).toContain("`SANDBOX=workspace-write` for `--write`");
+  expect(skill).toContain("`SANDBOX=danger-full-access` for `--full-access`");
+});
+
 test("installed paths stay in the plugin and all cited scripts are executable Bash", () => {
   let count = 0;
   const cited = new Set<string>();

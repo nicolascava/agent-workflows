@@ -1,7 +1,7 @@
 ---
 name: codex
 description: Delegate a bounded task to an installed Codex CLI signed in with ChatGPT. Use read-only access by default and report the session, final message, and verified evidence.
-argument-hint: "[--write] [--model <id>] [--resume <session-id>] <task>"
+argument-hint: "[--write | --full-access] [--model <id>] [--resume <session-id>] <task>"
 ---
 
 # Codex delegation
@@ -16,18 +16,25 @@ provider examples. Installing this Claude plugin does not configure Codex.
 
 ## Set the scope
 
-Parse `--write`, `--model`, and `--resume` separately from the task text. Never
-evaluate task text as shell code. Agree on the repository, task, acceptance
-criteria, and allowed commands from the user's request. Discover build and test
-commands from that repository. Do not install tools as part of this skill.
+Parse `--write`, `--full-access`, `--model`, and `--resume` separately from the
+task text. Never evaluate task text as shell code. Agree on the repository, task,
+acceptance criteria, and allowed commands from the user's request. Discover build
+and test commands from that repository. Do not install tools as part of this skill.
 
 The default sandbox is `read-only`. Use `approval_policy="never"` for every run.
 Without `--write`, ask Codex to inspect and report. It may propose a patch in its
 final message. It must not apply it.
 
-`--write` selects `danger-full-access`. This disables the filesystem sandbox and
-can expose files outside the repository and allow network access. State that risk
-before launching. Use it only when the user explicitly opts in. Keep the written
+`--write` selects `workspace-write`. Codex can write inside `WORKTREE`, `/tmp`,
+and `$TMPDIR`, and nowhere else. In a linked Git worktree the Git directory sits
+outside `WORKTREE`, so Codex can edit files but cannot commit. Claude commits.
+
+`--full-access` selects `danger-full-access`. This disables the filesystem sandbox
+and can expose files outside the repository and allow network access. State that
+risk before launching. Use it only when the user explicitly asks for full access
+and `workspace-write` cannot do the task. Never infer it from `--write`.
+
+Use either write mode only when the user explicitly opts in. Keep the written
 task within the authorized scope. This plugin ships no Codex command guards.
 Write access does not authorize commits, pushes, publication, or account changes.
 Existing Codex tools and command rules may have access beyond the shell sandbox.
@@ -74,7 +81,8 @@ CLI configuration. Set `MODEL` to that model identifier and retain it with the
 session ID. If the effective model cannot be established, request a model before
 launching. Do not substitute a fixed model from this skill.
 
-Set `SANDBOX=read-only`, or `SANDBOX=danger-full-access` for explicit `--write`.
+Set `SANDBOX=read-only` by default, `SANDBOX=workspace-write` for `--write`, or
+`SANDBOX=danger-full-access` for `--full-access`.
 Use a private scratch directory and a quoted heredoc. Keep task text off argv.
 
 ```bash
@@ -160,7 +168,8 @@ env -u OPENAI_API_KEY -u CODEX_API_KEY "$CODEX_BIN" exec \
 
 Immediately record `$!`, wait for that PID, and record its exit status as above.
 Read-only remains the default for a resumed task. Prior write access does not
-carry forward as consent for this task.
+carry forward as consent for this task. Pass `--write` or `--full-access` again
+to select `workspace-write` or `danger-full-access` for the resumed run.
 
 ## Reap leftovers
 

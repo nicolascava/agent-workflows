@@ -65,7 +65,7 @@ Installing `gemini` or `grok` does not configure or install its CLI. Each needs 
 - Publishing an acceptance review needs fresh approval of the final version.
 - Audit reports stay in the conversation unless you pick a file path.
 - Tools are never installed without your request and a preview of the command.
-- `codex` is read-only by default. `--write` turns off the filesystem sandbox.
+- `codex` is read-only by default. `--write` limits writes to the worktree and temp directories. `--full-access` turns off the filesystem sandbox.
 - `gemini` and `grok` only cross-check public web research Claude has already done. They grant no repository access or write mode and never auto-approve tools. Temporary research files are removed after the run.
 - `gemini` and `grok` run in read-only plan mode from an empty private directory. This is not an operating system sandbox, so review each CLI's own configuration.
 - Never send secrets, credentials, private code, customer names, or personal data to research providers. Claude checks cited URLs before relying on provider output.

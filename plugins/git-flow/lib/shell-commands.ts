@@ -1,7 +1,7 @@
 import { basename, resolve } from "node:path";
 
-// `dynamic` means a `$` or backtick in an argument reaches the shell outside single quotes.
-export type Invocation = { program: string; args: string[]; directory?: string; unsafe: boolean; dynamic: boolean };
+// `dynamic` means a `$` or backtick in an argument reaches the shell outside single quotes; `expanded` lists those arguments.
+export type Invocation = { program: string; args: string[]; directory?: string; unsafe: boolean; dynamic: boolean; expanded: string[] };
 
 // This inspects shell text, never evaluates it. Quoted prose stays one word.
 // Nested shells and command substitutions are inspected as commands too.
@@ -32,12 +32,12 @@ export function invocations(text: string, directory?: string, depth = 0): Invoca
       const at = args.findIndex(a => /^-[a-z]*c$/.test(a));
       // The outer shell expands the script before the inner shell re-reads its quotes.
       const outer = isDynamic(args[at + 1] ?? "");
-      result.push(...invocations(args[at + 1] ?? "", current, depth + 1).map(call => ({ ...call, unsafe: call.unsafe || routed || outer, dynamic: call.dynamic || outer })));
+      result.push(...invocations(args[at + 1] ?? "", current, depth + 1).map(call => ({ ...call, unsafe: call.unsafe || routed || outer, dynamic: call.dynamic || outer, expanded: outer ? call.args : call.expanded })));
       return;
     }
     if (program === "eval") {
       const outer = args.some(isDynamic);
-      result.push(...invocations(args.join(" "), current, depth + 1).map(call => ({ ...call, unsafe: call.unsafe || outer, dynamic: call.dynamic || outer })));
+      result.push(...invocations(args.join(" "), current, depth + 1).map(call => ({ ...call, unsafe: call.unsafe || outer, dynamic: call.dynamic || outer, expanded: outer ? call.args : call.expanded })));
       return;
     }
     if (program === "git") {
@@ -61,8 +61,8 @@ export function invocations(text: string, directory?: string, depth = 0): Invoca
         if (option !== "--") routed = true;
       }
     }
-    const dynamic = args.some(isDynamic);
-    result.push({ program, args, directory: commandDirectory, unsafe: routed || dynamic, dynamic });
+    const expandedArgs = args.filter(isDynamic), dynamic = expandedArgs.length > 0;
+    result.push({ program, args, directory: commandDirectory, unsafe: routed || dynamic, dynamic, expanded: expandedArgs });
   }
   for (let i = 0; i < text.length; i++) {
     const char = text[i]!;

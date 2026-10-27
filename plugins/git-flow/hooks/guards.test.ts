@@ -179,6 +179,9 @@ describe("PR mutation guard", () => {
   test("raw review writes are denied in every mode", () => {
     for (const mode of [undefined, "pr", "solo-shaped-kanban"]) {
       const cwd = repo(mode);
+      writeFileSync(join(cwd, "read.graphql"), "query { viewer { login } }");
+      writeFileSync(join(cwd, "review.graphql"), "mutation { dismissPullRequestReview(input: {}) { clientMutationId } }");
+      writeFileSync(join(cwd, "review-query.json"), JSON.stringify({ query: "mutation { deletePullRequestReviewComment(input: {}) { clientMutationId } }" }));
       for (const command of [
         "gh pr review 12 --approve", "gh pr review 12 --request-changes -b 'Fix it'", "gh pr review --comment --body-file review.md",
         "gh api repos/example/app/pulls/12/reviews --input review.json", "gh api -X POST repos/example/app/pulls/12/reviews",
@@ -188,20 +191,48 @@ describe("PR mutation guard", () => {
         "gh api graphql -f query='mutation { addPullRequestReview(input: {}) { clientMutationId } }'",
         "gh api graphql -F query='mutation { submitPullRequestReview(input: {}) { clientMutationId } }'",
         "bash -c 'gh pr review 12 --approve'", "echo ok && gh -R example/app pr review 12 --approve",
+        "gh api \"$ENDPOINT\" -f body=x", "gh api https://api.github.com/repos/example/app/pulls/12/reviews -f event=APPROVE",
+        "gh api https://ghe.example.com/api/v3/repos/example/app/pulls/12/reviews -f event=APPROVE", "gh api 'repos/example/app/pulls/12/comments?per_page=1' -f body=x",
+        "Q='mutation { addPullRequestReview(input: {}) { clientMutationId } }'; gh api graphql -f query=\"$Q\"",
+        "gh api graphql -F query=@./review.graphql", "gh api graphql --input review-query.json", "gh api graphql -F query=@./missing.graphql",
+        "gh api graphql -F query=@- <<'EOF'\nmutation { addPullRequestReviewThreadReply(input: {}) { clientMutationId } }\nEOF",
+        "gh api graphql -f query=\"$(cat read.graphql)\"", "cat read.graphql | gh api graphql -F query=@-", "gh api graphql -f query=\"$QUERY\"",
+        "curl -X POST -H \"Authorization: Bearer $GITHUB_TOKEN\" https://api.github.com/repos/example/app/pulls/12/reviews -d '{\"event\":\"APPROVE\"}'",
+        "curl -d @review.json \"$GITHUB_API_URL/repos/example/app/pulls/12/comments\"",
+        "curl https://api.github.com/graphql -d '{\"query\":\"mutation { addPullRequestReview(input: {}) { clientMutationId } }\"}'",
+        "gh api graphql --input - <<< \"$(cat review-query.json)\"", "gh api \"$BASE/pulls/12/reviews\" -f event=APPROVE", "curl \"https://api.github.com/graphql",
+        "gh api graphql -F query=@- <<EOF\n$QUERY\nEOF", "curl https://api.github.com/graphql -d \"{\\\"query\\\": \\\"$Q\\\"}\"",
+        "cd \"$D\" && gh api graphql -F query=@./read.graphql", "cat <<'X' > n.txt\nhi\nX\ncat review.graphql | gh api graphql -F query=@-",
+        "cat review.graphql | gh api graphql -F query=@/dev/stdin", "gh api graphql --input - < read.graphql", "curl -oGitHub.json -d '{}' https://api.github.com/repos/o/r/pulls/1/reviews", "cat q.json | curl https://api.github.com/graphql -d @/dev/stdin",
+        "Q='query { viewer { login } }'; gh api graphql -f query=\"$Q\"", "query=$(cat review.graphql); gh api graphql -f query=\"$query\"",
+        "gh api graphql -f query=\"$q\" -f q=1", "curl -d \"{\\\"query\\\": \\\"$(cat review.graphql)\\\"}\" https://api.github.com/graphql",
+        "curl -X POST api.github.com/repos/example/app/pulls/1/reviews -d '{}'",
+        "curl -X DELETE https://api.github.com/repos/example/app/pulls/comments/9", "curl -sX DELETE https://api.github.com/repos/example/app/pulls/comments/9",
+        "curl -sd '{\"event\":\"APPROVE\"}' https://api.github.com/repos/example/app/pulls/12/reviews",
       ]) expect(decision(hook("guard-pr-mutation", cwd, bash(cwd, command)))).toBe("deny");
       for (const tool of ["mcp__github__create_pending_pull_request_review", "mcp__github__pull_request_review_write", "mcp__github__add_comment_to_pending_review", "mcp__github__submit_pending_pull_request_review", "mcp__github__create_and_submit_pull_request_review", "mcp__github__add_reply_to_pull_request_comment"]) {
         expect(decision(hook("guard-pr-mutation", cwd, { cwd, tool_name: tool, tool_input: { owner: "example", repo: "app", pullNumber: 12 } }))).toBe("deny");
       }
     }
-  });
+  }, 60_000);
   test("review reads and guarded review writers are allowed", () => {
     const cwd = repo("pr");
+    writeFileSync(join(cwd, "read.graphql"), "query { viewer { login } }");
     for (const command of [
+      "gh api repos/example/app/pulls/comments/9/reactions -f content=+1", "gh api graphql -F query=@./read.graphql",
+      "gh api graphql -F query=@- <<'EOF'\nquery { viewer { login } }\nEOF",
+      "gh api graphql -f query='query($n: Int!) { viewer { login } }' -F n=\"$(gh pr view --json number -q .number)\"",
+      "curl https://api.github.com/repos/example/app/pulls/12/reviews", "curl -G https://api.github.com/repos/example/app/pulls/12/comments -d per_page=100",
+      "curl -X POST \"$WEBHOOK_URL\" -d '{\"text\":\"Done\"}'",
+      "gh api \"$API/issues/12/comments\" -f body=x", "curl -s http://localhost:4000/graphql -d \"$BODY\"",
+      "curl -X POST https://hooks.example.com/x --data-binary @- <<'EOF'\nCan't deploy\nEOF", "curl -sG https://api.github.com/repos/example/app/pulls/12/reviews -d per_page=1",
+      "gh api graphql -F owner=\"$(gh repo view --json owner -q .owner.login)\" -F query=@- <<'EOF'\nquery($owner: String!) { repositoryOwner(login: $owner) { id } }\nEOF",
+      "gh api graphql -F query=@- <<-'EOF'\n\tquery { viewer { login } }\n\tEOF",
       "gh api repos/example/app/pulls/12/reviews", "gh api -X GET repos/example/app/pulls/12/comments -f per_page=100",
       "gh pr view 12 --json reviews", "gh pr comment 12 --body Thanks", "gh api graphql -f query='query { repository(owner: \"example\", name: \"app\") { id } }'",
       "bun scripts/review-write-guard.ts --event REQUEST_CHANGES --candidates review.json",
     ]) expect(hook("guard-pr-mutation", cwd, bash(cwd, command))).toBeUndefined();
-    for (const tool of ["mcp__github__get_pull_request_reviews", "mcp__github__get_pull_request_review_comments", "mcp__github__pull_request_read"]) {
+    for (const tool of ["mcp__github__request_copilot_review", "mcp__github__resolve_review_thread", "mcp__github__unresolve_review_thread", "mcp__github__get_pull_request_reviews", "mcp__github__get_pull_request_review_comments", "mcp__github__pull_request_read"]) {
       expect(hook("guard-pr-mutation", cwd, { cwd, tool_name: tool, tool_input: { owner: "example", repo: "app", pullNumber: 12 } })).toBeUndefined();
     }
   });

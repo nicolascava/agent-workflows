@@ -28,7 +28,7 @@ export function commands(payload: Record<string, unknown>): Invocation[] {
   try { directory = projectDirectory(payload); } catch {}
   try { return invocations(payload.tool_input.command, directory); }
   catch (error) {
-    if (!/\b(?:git|gh)\b/.test(payload.tool_input.command)) return [];
+    if (!/\b(?:git|gh)\b|\bcurl\b[^]*(?:github|graphql|\/pulls\/)/.test(payload.tool_input.command)) return [];
     throw error;
   }
 }

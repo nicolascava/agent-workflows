@@ -31,8 +31,14 @@ If you run your own repository-creation guard, set
 skip this hook's repository-creation confirmation for CLI, API and MCP calls.
 Only the exact value `1` opts out. Other values retain `ask`. Repository validation,
 PR mode checks and all other guard decisions still apply.
-Raw review writes cover `gh pr review`, non-GET `gh api` calls to PR review and
-review-comment endpoints, review GraphQL mutations and GitHub MCP review tools.
+Raw review writes cover `gh pr review`, non-GET `gh api` and `curl` calls to PR
+review and review-comment endpoints, review GraphQL mutations and GitHub MCP review
+tools. A `gh api` write to an endpoint held in a variable counts as one, as does a
+GraphQL query the hook cannot read: from a shell variable or command output,
+piped or redirected input, a here-string, an unquoted heredoc, `/dev/stdin` or another
+unreadable or non-regular file. curl GraphQL calls count only toward a GitHub
+or variable host or an `/api/graphql` path, while curl review endpoints count on
+any host. Reactions, Copilot review requests and thread resolution are allowed.
 Post reviews through a guard that checks the exact payload; its own `gh` calls run
 outside the tool call and are not inspected. If you run such a guard, set
 `AGENT_WORKFLOWS_ALLOW_RAW_REVIEW=1` in the environment launching Claude Code to

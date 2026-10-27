@@ -20,6 +20,7 @@ A repository without `git-workflow.json` is treated as `pr`.
 | Admin merge override | deny | deny |
 | Force or mirror push touching the base | deny | deny |
 | Direct base push | deny | allow |
+| Raw PR review or review-comment write | deny | deny |
 | Explicit feature push or ordinary PR mutation | allow | allow |
 
 Without a declared `branchPrefix`, there is no prefix gate.
@@ -30,6 +31,12 @@ If you run your own repository-creation guard, set
 skip this hook's repository-creation confirmation for CLI, API and MCP calls.
 Only the exact value `1` opts out. Other values retain `ask`. Repository validation,
 PR mode checks and all other guard decisions still apply.
+Raw review writes cover `gh pr review`, non-GET `gh api` calls to PR review and
+review-comment endpoints, review GraphQL mutations and GitHub MCP review tools.
+Post reviews through a guard that checks the exact payload; its own `gh` calls run
+outside the tool call and are not inspected. If you run such a guard, set
+`AGENT_WORKFLOWS_ALLOW_RAW_REVIEW=1` in the environment launching Claude Code to
+skip this check. Only the exact value `1` opts out.
 Issues have no separate public policy setting. Unknown declaration fields are rejected.
 A malformed declaration or unresolved guarded root denies even a creation that normally asks.
 Base checks use declared `baseBranch`, then the local `origin/HEAD` symbolic ref.

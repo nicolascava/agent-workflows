@@ -23,7 +23,7 @@ function repo(mode?: string, prefix?: string) {
 function hook(name: string, cwd: string, input: unknown, env: Record<string, string> = {}, root = plugin) {
   const result = spawnSync("/bin/bash", [join(root, "hooks", `${name}.sh`)], {
     cwd, input: typeof input === "string" ? input : JSON.stringify(input), encoding: "utf8", timeout: 6000,
-    env: { ...process.env, CLAUDE_PLUGIN_ROOT: root, AGENT_WORKFLOWS_ALLOW_REPO_CREATE: "", ...env },
+    env: { ...process.env, CLAUDE_PLUGIN_ROOT: root, AGENT_WORKFLOWS_ALLOW_REPO_CREATE: "", AGENT_WORKFLOWS_ALLOW_RAW_REVIEW: "", ...env },
   });
   expect(result.error).toBeUndefined(); expect(result.status).toBe(0); expect(result.stderr).toBe("");
   return result.stdout.trim() ? JSON.parse(result.stdout).hookSpecificOutput : undefined;
@@ -175,6 +175,41 @@ describe("PR mutation guard", () => {
     git(cwd, "config", "--unset", "remote.pushDefault");
     git(cwd, "config", "branch.developer/fix.pushRemote", "publish");
     expect(decision(hook("guard-pr-mutation", cwd, bash(cwd, "git push")))).toBe("deny");
+  });
+  test("raw review writes are denied in every mode", () => {
+    for (const mode of [undefined, "pr", "solo-shaped-kanban"]) {
+      const cwd = repo(mode);
+      for (const command of [
+        "gh pr review 12 --approve", "gh pr review 12 --request-changes -b 'Fix it'", "gh pr review --comment --body-file review.md",
+        "gh api repos/example/app/pulls/12/reviews --input review.json", "gh api -X POST repos/example/app/pulls/12/reviews",
+        "gh api --method=PUT /repos/example/app/pulls/12/reviews/5 -f body=Edited", "gh api repos/example/app/pulls/12/reviews/5/events -f event=APPROVE",
+        "gh api repos/example/app/pulls/12/comments -f body=Nit", "gh api repos/example/app/pulls/12/comments/9/replies -fbody=Done",
+        "gh api -XPATCH repos/example/app/pulls/comments/9 -f body=Edited", "gh api repos/example/app/pulls/$PR/reviews -f event=APPROVE", "gh api -X PATCH repos/example/app/pulls/comments/$id -f body=Edited", "gh api \"repos/$REPO/pulls/$PR/reviews\" -f event=APPROVE", "gh api repos/$GITHUB_REPOSITORY/pulls/12/comments -f body=x", "gh api -X DELETE repos/example/app/pulls/12/reviews/5",
+        "gh api graphql -f query='mutation { addPullRequestReview(input: {}) { clientMutationId } }'",
+        "gh api graphql -F query='mutation { submitPullRequestReview(input: {}) { clientMutationId } }'",
+        "bash -c 'gh pr review 12 --approve'", "echo ok && gh -R example/app pr review 12 --approve",
+      ]) expect(decision(hook("guard-pr-mutation", cwd, bash(cwd, command)))).toBe("deny");
+      for (const tool of ["mcp__github__create_pending_pull_request_review", "mcp__github__pull_request_review_write", "mcp__github__add_comment_to_pending_review", "mcp__github__submit_pending_pull_request_review", "mcp__github__create_and_submit_pull_request_review", "mcp__github__add_reply_to_pull_request_comment"]) {
+        expect(decision(hook("guard-pr-mutation", cwd, { cwd, tool_name: tool, tool_input: { owner: "example", repo: "app", pullNumber: 12 } }))).toBe("deny");
+      }
+    }
+  });
+  test("review reads and guarded review writers are allowed", () => {
+    const cwd = repo("pr");
+    for (const command of [
+      "gh api repos/example/app/pulls/12/reviews", "gh api -X GET repos/example/app/pulls/12/comments -f per_page=100",
+      "gh pr view 12 --json reviews", "gh pr comment 12 --body Thanks", "gh api graphql -f query='query { repository(owner: \"example\", name: \"app\") { id } }'",
+      "bun scripts/review-write-guard.ts --event REQUEST_CHANGES --candidates review.json",
+    ]) expect(hook("guard-pr-mutation", cwd, bash(cwd, command))).toBeUndefined();
+    for (const tool of ["mcp__github__get_pull_request_reviews", "mcp__github__get_pull_request_review_comments", "mcp__github__pull_request_read"]) {
+      expect(hook("guard-pr-mutation", cwd, { cwd, tool_name: tool, tool_input: { owner: "example", repo: "app", pullNumber: 12 } })).toBeUndefined();
+    }
+  });
+  test("an external review-write guard opts out with the exact value 1", () => {
+    const cwd = repo("pr");
+    const review = bash(cwd, "gh pr review 12 --approve");
+    expect(hook("guard-pr-mutation", cwd, review, { AGENT_WORKFLOWS_ALLOW_RAW_REVIEW: "1" })).toBeUndefined();
+    expect(decision(hook("guard-pr-mutation", cwd, review, { AGENT_WORKFLOWS_ALLOW_RAW_REVIEW: "true" }))).toBe("deny");
   });
 });
 

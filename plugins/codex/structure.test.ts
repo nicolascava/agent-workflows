@@ -27,6 +27,12 @@ test("Codex write modes map to the intended sandboxes", () => {
   expect(skill).toContain("`--full-access` selects `danger-full-access`.");
   expect(skill).toContain("`SANDBOX=workspace-write` for `--write`");
   expect(skill).toContain("`SANDBOX=danger-full-access` for `--full-access`");
+  expect(skill).toContain("Set `SANDBOX=read-only` by default");
+  expect(skill).toContain('-c "sandbox_mode=\\"$SANDBOX\\""');
+  expect(skill).toContain("Never\nassume `--full-access`.");
+  expect(skill).toContain('argument-hint: "[--write | --full-access]');
+  expect(skill).not.toContain("`--write` selects `danger-full-access`");
+  expect(skill).not.toContain("Without `--write`");
 });
 
 test("installed paths stay in the plugin and all cited scripts are executable Bash", () => {

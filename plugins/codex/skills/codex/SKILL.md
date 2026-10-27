@@ -20,14 +20,18 @@ Parse `--write`, `--full-access`, `--model`, and `--resume` separately from the
 task text. Never evaluate task text as shell code. Agree on the repository, task,
 acceptance criteria, and allowed commands from the user's request. Discover build
 and test commands from that repository. Do not install tools as part of this skill.
+If both `--write` and `--full-access` are given, ask which one is intended. Never
+assume `--full-access`.
 
 The default sandbox is `read-only`. Use `approval_policy="never"` for every run.
-Without `--write`, ask Codex to inspect and report. It may propose a patch in its
+In read-only mode, ask Codex to inspect and report. It may propose a patch in its
 final message. It must not apply it.
 
-`--write` selects `workspace-write`. Codex can write inside `WORKTREE`, `/tmp`,
-and `$TMPDIR`, and nowhere else. In a linked Git worktree the Git directory sits
-outside `WORKTREE`, so Codex can edit files but cannot commit. Claude commits.
+`--write` selects `workspace-write`. By default Codex can write inside `WORKTREE`,
+`/tmp`, and `$TMPDIR`. The user's Codex config can add writable roots through
+`sandbox_workspace_write.writable_roots`. Network access is off unless that config
+enables it, so tasks that download packages may fail. Codex keeps `.git` read-only,
+so it can edit files but cannot commit. Claude commits.
 
 `--full-access` selects `danger-full-access`. This disables the filesystem sandbox
 and can expose files outside the repository and allow network access. State that

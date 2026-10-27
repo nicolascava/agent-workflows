@@ -30,8 +30,8 @@ final message. It must not apply it.
 `--write` selects `workspace-write`. By default Codex can write inside `WORKTREE`,
 `/tmp`, and `$TMPDIR`. The user's Codex config can add writable roots through
 `sandbox_workspace_write.writable_roots`. Network access is off unless that config
-enables it, so tasks that download packages may fail. Codex keeps `.git` read-only,
-so it can edit files but cannot commit. Claude commits.
+enables it, so tasks that download packages may fail. The sandbox keeps `.git`
+read-only, so sandboxed commands cannot commit. Claude commits.
 
 `--full-access` selects `danger-full-access`. This disables the filesystem sandbox
 and can expose files outside the repository and allow network access. State that

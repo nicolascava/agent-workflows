@@ -95,8 +95,8 @@ Approved candidates receive TERM, then KILL if still alive after the grace perio
 Read-only delegation is the default. The skill's explicit `--write` option uses
 `workspace-write`, which limits writes to the worktree, `/tmp`, and `$TMPDIR`
 by default. Your Codex config can add writable roots or turn on network access,
-which is off by default. Codex keeps `.git` read-only, so it cannot commit. The
-separate `--full-access` option uses
+which is off by default. The sandbox keeps `.git` read-only, so sandboxed
+commands cannot commit. The separate `--full-access` option uses
 `danger-full-access`, which removes the filesystem sandbox and can allow network
 access. Neither option provides repository guard hooks. Review the task and
 these risks before opting in. Writes still need verification after the run.

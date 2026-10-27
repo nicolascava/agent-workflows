@@ -22,14 +22,14 @@ test("Codex skill has valid front matter and the namespaced entry point", () => 
 });
 
 test("Codex write modes map to the intended sandboxes", () => {
-  const skill = readFileSync(resolve(root, "skills/codex/SKILL.md"), "utf8");
+  const skill = readFileSync(resolve(root, "skills/codex/SKILL.md"), "utf8").replace(/\s+/g, " ");
   expect(skill).toContain("`--write` selects `workspace-write`.");
   expect(skill).toContain("`--full-access` selects `danger-full-access`.");
   expect(skill).toContain("`SANDBOX=workspace-write` for `--write`");
   expect(skill).toContain("`SANDBOX=danger-full-access` for `--full-access`");
   expect(skill).toContain("Set `SANDBOX=read-only` by default");
   expect(skill).toContain('-c "sandbox_mode=\\"$SANDBOX\\""');
-  expect(skill).toContain("Never\nassume `--full-access`.");
+  expect(skill).toContain("Never assume `--full-access`.");
   expect(skill).toContain('argument-hint: "[--write | --full-access]');
   expect(skill).not.toContain("`--write` selects `danger-full-access`");
   expect(skill).not.toContain("Without `--write`");

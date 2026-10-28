@@ -236,6 +236,18 @@ describe("PR mutation guard", () => {
       expect(hook("guard-pr-mutation", cwd, { cwd, tool_name: tool, tool_input: { owner: "example", repo: "app", pullNumber: 12 } })).toBeUndefined();
     }
   });
+  test("guarded thread reply scripts are allowed and the raw reply denial names the guard", () => {
+    const cwd = repo("pr");
+    for (const command of [
+      'bun "$CLAUDE_PLUGIN_ROOT/bin/post-review-reply.ts" --repo a/b --pr 1 ...',
+      `bun "${plugin}/bin/post-review-reply.ts" --repo a/b --pr 1 ...`,
+    ]) expect(hook("guard-pr-mutation", cwd, bash(cwd, command))).toBeUndefined();
+    const output = hook("guard-pr-mutation", cwd, bash(cwd, "gh api repos/a/b/pulls/1/comments/9/replies --input reply.json"));
+    expect(decision(output)).toBe("deny");
+    expect(output.permissionDecisionReason).toContain("${CLAUDE_PLUGIN_ROOT}/bin/post-review-reply.ts");
+    expect(output.permissionDecisionReason).toContain("user approves the exact payload");
+    expect(output.permissionDecisionReason).toContain("repository's own review guard");
+  });
   test("an external review-write guard opts out with the exact value 1", () => {
     const cwd = repo("pr");
     const review = bash(cwd, "gh pr review 12 --approve");

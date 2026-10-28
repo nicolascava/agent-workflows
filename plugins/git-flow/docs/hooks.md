@@ -39,8 +39,10 @@ piped or redirected input, a here-string, an unquoted heredoc, `/dev/stdin` or a
 unreadable or non-regular file. curl GraphQL calls count only toward a GitHub
 or variable host or an `/api/graphql` path, while curl review endpoints count on
 any host. Reactions, Copilot review requests and thread resolution are allowed.
-Post reviews through a guard that checks the exact payload; its own `gh` calls run
-outside the tool call and are not inspected. If you run such a guard, set
+Post thread replies through `bin/post-review-reply.ts` after the user approves the
+exact payload. Post whole reviews through the repository's own review guard.
+These guards' own `gh` calls run outside the tool call and are not inspected.
+If you run your own guard, set
 `AGENT_WORKFLOWS_ALLOW_RAW_REVIEW=1` in the environment launching Claude Code to
 skip this check. Only the exact value `1` opts out.
 Issues have no separate public policy setting. Unknown declaration fields are rejected.

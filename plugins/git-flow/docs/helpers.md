@@ -8,6 +8,7 @@ All executable helpers use Bun and built-in modules. External commands are limit
 | `verification-source.ts` | Race checks, immutable fetch binding, safe environment and cleanup are too easy to lose in repeated shell instructions; copied with tests from public core |
 | `execute-test-plan.ts` | Markdown comments, variable-length fences, physical line numbers and byte-preserving checkbox updates need a parser; local files only |
 | `check-pr-copy.ts` | Deterministic visible-description and reference checks avoid repeated regex instructions; local files only |
+| `post-review-reply.ts` | Binds one approved reply to a payload digest and a live unresolved PR thread, posts and reads it back, then optionally resolves it |
 
 `execute-test-plan.ts show <body-file>` prints indexed items as JSON. `check <body-file> <index>` prints a candidate body to stdout and never edits its input or GitHub. Use a different output file, never redirect over the input. The skill controls source evidence and authorization before a single final PR edit.
 

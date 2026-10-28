@@ -6,7 +6,7 @@ import { deny } from "../lib/hook-runtime";
 import { isRecord } from "../lib/is-record";
 import type { Invocation } from "../lib/shell-commands";
 
-const rawReview = "Raw PR review writes are blocked. Show the user the exact review payload, then post it through a review-write guard. Set AGENT_WORKFLOWS_ALLOW_RAW_REVIEW=1 in the environment launching Claude Code if you run your own.";
+const rawReview = "Raw PR review writes are blocked. Post thread replies through ${CLAUDE_PLUGIN_ROOT}/bin/post-review-reply.ts after the user approves the exact payload. Post whole reviews through the repository's own review guard. Set AGENT_WORKFLOWS_ALLOW_RAW_REVIEW=1 in the environment launching Claude Code if you run your own.";
 const reviewEndpoint = /^\/?(?:api\/v3\/)?(?:repos\/(?:[^/]+\/)?[^/]+\/)?pulls\/(?:[^/]+\/(?:reviews|comments)|comments\/[^/?#]+(?!\/reactions))(?:[/?#]|$)/;
 const graphqlEndpoint = /^\/?(?:api\/)?graphql(?:[?#]|$)/;
 const reviewMutation = /\b(?:add|submit|update|delete|dismiss)PullRequestReview\w*/;

@@ -32,4 +32,4 @@ For a field sync, capture direct children in native order, live project fields, 
 
 Building, review, or acceptance in any child may move a parent to configured building. With no active child, leave parent status unchanged. Never infer shipped, ready, closed, or completed from child values. Sync edits the parent only. Preflight every field and option before writing. Missing configuration preserves hierarchy and reports unavailable board operations.
 
-The shipped parent CLI previews hierarchy only. Field sync and placement remain explicit skill procedures using live field readers and previewed provider payloads. There is no automatic scheduler or retry loop.
+The shipped parent CLI previews hierarchy only. Field sync and placement remain explicit skill procedures using live `gh` reads and previewed provider payloads. There is no automatic scheduler or retry loop.

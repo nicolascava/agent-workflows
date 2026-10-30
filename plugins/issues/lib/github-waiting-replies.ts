@@ -1,17 +1,19 @@
 import { connection, json, type Runner } from "./gh.ts";
 import { normalizeRepository } from "./github-target.ts";
+import { parseFenceOpener, closesFence, type MarkdownFence } from "./markdown-fence.ts";
 type Comment = { id: string; author: string; body: string; createdAt: string; url: string; human: boolean; minimized?: boolean };
 type Thread = { resolved: boolean; comments: Comment[] };
 type Signal = { reason: string; url?: string; since?: string; urgent: boolean };
 function visible(body: string) {
-  let fence: { character: string; length: number } | undefined;
+  let fence: MarkdownFence | undefined;
   return body.split(/\r?\n/).filter(line => {
-    const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    // Preserve the former (.*)$ suffix check, which rejects line terminators.
+    const marker = /[\r\n\u2028\u2029]/.test(line) ? null : parseFenceOpener(line);
     if (fence) {
-      if (marker && marker[1][0] === fence.character && marker[1].length >= fence.length && !marker[2].trim()) fence = undefined;
+      if (marker && closesFence(line, fence)) fence = undefined;
       return false;
     }
-    if (marker) { fence = { character: marker[1][0], length: marker[1].length }; return false; }
+    if (marker) { fence = marker; return false; }
     return !/^\s*>/.test(line);
   }).join("\n").replace(/(`+)[^]*?\1/g, "");
 }

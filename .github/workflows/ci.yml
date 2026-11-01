@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - run: npm install -g @anthropic-ai/claude-code@2.1.290
+      - run: npm install -g @anthropic-ai/claude-code@2.1.316
       - run: npm run validate
 
   secrets:

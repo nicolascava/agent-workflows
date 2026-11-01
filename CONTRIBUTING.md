@@ -9,7 +9,7 @@ identifiers, or secrets. Use synthetic fixtures for tests.
 Keep private denylist files outside tracked content.
 
 Use Bun 1.3.9 and an installed Claude Code CLI.
-CI validates with Claude Code 2.1.290.
+CI validates with Claude Code 2.1.316.
 No dependency installation is needed for the Bun checks.
 
 Stage new files before scanning because the scanner reads git-tracked files.

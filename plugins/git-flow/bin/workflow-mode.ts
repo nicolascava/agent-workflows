@@ -1,6 +1,14 @@
 #!/usr/bin/env bun
 import { closeSync, constants, fstatSync, openSync, readSync, realpathSync } from "node:fs";
 import { join } from "node:path";
+import { repositoryRoutingEnvironment } from "../lib/git-environment";
+
+export function isAgentName(value: string): boolean {
+  return /^(?:claude|codex|gemini|agent|assistant|worktree)(?:[/-]|$)/i.test(value);
+}
+export function validBranchPrefix(value: unknown): value is string {
+  return typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && !isAgentName(value);
+}
 
 const setup = 'Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.';
 const env = { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_NO_REPLACE_OBJECTS: "1", GIT_OPTIONAL_LOCKS: "0" };
@@ -47,7 +55,7 @@ export function readWorkflowDeclaration(root: string): WorkflowDeclaration {
     if (typeof config.baseBranch !== "string" || config.baseBranch === "HEAD" || config.baseBranch.startsWith("refs/")) throw new Error("baseBranch must be a branch name");
     git("check-ref-format", `refs/heads/${config.baseBranch}`);
   }
-  if (config.branchPrefix !== undefined && (typeof config.branchPrefix !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.branchPrefix) || /^(?:claude|codex|gemini|agent|assistant)(?:-|$)|^worktree(?:-|$)/i.test(config.branchPrefix))) throw new Error("branchPrefix must identify a contributor, not an agent");
+  if (config.branchPrefix !== undefined && !validBranchPrefix(config.branchPrefix)) throw new Error("branchPrefix must identify a contributor, not an agent");
   if (config.land !== undefined) {
     const land = config.land;
     if (!land || typeof land !== "object" || Array.isArray(land) || Object.keys(land).some(k => !["quality", "deploy"].includes(k))) throw new Error("invalid land schema");
@@ -62,7 +70,7 @@ export function readWorkflowDeclaration(root: string): WorkflowDeclaration {
 
 function main() {
   for (const key of Object.keys(process.env)) {
-    if (/^GIT_(?:DIR|WORK_TREE|COMMON_DIR|INDEX_FILE|OBJECT_DIRECTORY|ALTERNATE_OBJECT_DIRECTORIES|NAMESPACE|SHALLOW_FILE|REPLACE_REF_BASE|CONFIG.*)$/.test(key)) throw new Error("repository-routing environment override is not allowed");
+    if (repositoryRoutingEnvironment.test(key)) throw new Error("repository-routing environment override is not allowed");
   }
   const args = process.argv.slice(2);
   if (args.length && (args.length !== 2 || args[0] !== "--remote" || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(args[1]!))) throw new Error("usage: workflow-mode.ts [--remote <name>]");
@@ -93,7 +101,7 @@ function main() {
     try { branchPrefix = command(["gh", "api", "user", "--jq", ".login"]).toLowerCase(); }
     catch { branchPrefix = git("config", "user.name").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
   }
-  if (typeof branchPrefix !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(branchPrefix) || /^(?:claude|codex|gemini|agent|assistant)(?:-|$)|^worktree(?:-|$)/i.test(branchPrefix)) throw new Error("branchPrefix must identify a contributor, not an agent");
+  if (!validBranchPrefix(branchPrefix)) throw new Error("branchPrefix must identify a contributor, not an agent");
   return { root, workflow: config.workflow, baseBranch, branchPrefix, remote };
 }
 if (import.meta.main) {

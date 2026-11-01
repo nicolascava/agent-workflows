@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { commands, guard, repository } from "../lib/guard-policy";
 import { deny } from "../lib/hook-runtime";
+import { isAgentName } from "../bin/workflow-mode";
 
 function createdBranches(args: string[]): string[] {
   const [verb, ...rest] = args;
@@ -28,7 +29,7 @@ export async function run(payload: Record<string, unknown>) {
     const names = createdBranches(call.args); if (!names.length) continue;
     const { config } = await repository(payload, call);
     for (const name of names) {
-      if (!name || /^(?:claude|codex|gemini|agent|assistant|worktree)(?:[/-]|$)/i.test(name)) { deny("Use a contributor branch prefix, not an agent prefix."); return; }
+      if (!name || isAgentName(name)) { deny("Use a contributor branch prefix, not an agent prefix."); return; }
       if (config.branchPrefix && !new RegExp(`^${config.branchPrefix}/[a-z0-9]+(?:-[a-z0-9]+)*$`).test(name)) { deny("Use the declared branchPrefix followed by a lowercase hyphenated slug."); return; }
     }
   }

@@ -149,3 +149,34 @@ test("labels an unresolvable repository root without the setup hint", () => {
 test("rejects repository routing overrides", () => {
   const f = fixture(); f.config({ workflow: "pr" }); fail(f.run([], { GIT_WORK_TREE: f.root }), false);
 });
+test("rejects every repository routing key with the current diagnostic", () => {
+  const f = fixture(); f.config({ workflow: "pr" });
+  for (const key of [
+    "GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_NAMESPACE",
+    "GIT_SHALLOW_FILE", "GIT_REPLACE_REF_BASE", "GIT_CONFIG", "GIT_CONFIG_COUNT",
+    "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM",
+    "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_CUSTOM",
+  ]) {
+    const r = f.run([], { [key]: "override" });
+    expect(r.exitCode).toBe(1);
+    expect(r.stdout.toString()).toBe("");
+    expect(r.stderr.toString()).toBe("workflow-mode: repository-routing environment override is not allowed.\n");
+  }
+});
+test("rejects assistant and uppercase agent branch prefixes with the current diagnostic", () => {
+  const f = fixture();
+  const message = "workflow-mode: branchPrefix must identify a contributor, not an agent.";
+  for (const name of ["assistant", "CLAUDE"]) {
+    f.config({ workflow: "pr", branchPrefix: name });
+    const declared = f.run();
+    expect(declared.exitCode).toBe(1);
+    expect(declared.stdout.toString()).toBe("");
+    expect(declared.stderr.toString()).toBe(`${message} Create git-workflow.json at the repository root with {"workflow":"pr"} or {"workflow":"solo-shaped-kanban"}.\n`);
+    f.config({ workflow: "pr" });
+    const discovered = f.run([], { FAKE_LOGIN: name });
+    expect(discovered.exitCode).toBe(1);
+    expect(discovered.stdout.toString()).toBe("");
+    expect(discovered.stderr.toString()).toBe(`${message}\n`);
+  }
+});

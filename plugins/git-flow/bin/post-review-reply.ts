@@ -7,8 +7,8 @@ import { runBounded } from "../lib/bounded-command";
 import { isRecord } from "../lib/is-record";
 
 export type GhRunner = (args: string[], input?: string) => Promise<string>;
-export interface ReplyResult { replyId: number; replyUrl: string; resolved: boolean }
-export interface ReplyOutcome { exitCode: number; reply?: ReplyResult; error?: string }
+interface ReplyResult { replyId: number; replyUrl: string; resolved: boolean }
+interface ReplyOutcome { exitCode: number; reply?: ReplyResult; error?: string }
 interface Options { repo: string; pr: number; payload: string; threadId: string; rootId: number; sha256: string; resolve: boolean }
 
 const threadsQuery = `query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
@@ -26,7 +26,7 @@ const resolveQuery = `mutation($threadId: ID!) {
 }`;
 const positiveId = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 
-export function parseArguments(args: string[]): Options {
+function parseArguments(args: string[]): Options {
   const values = new Map<string, string>(); let resolve = false;
   const flags = ["--repo", "--pr", "--payload", "--thread-id", "--root-comment-id", "--sha256"];
   for (let i = 0; i < args.length; i++) {

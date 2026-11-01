@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { readFileSync } from "node:fs";
 
-export interface TestPlanItem { index: number; line: number; bullet: string; text: string; checked: boolean }
+interface TestPlanItem { index: number; line: number; bullet: string; text: string; checked: boolean }
 
 // Keep physical line numbers while excluding examples and HTML comments.
 // Malformed markup is ambiguous, so callers must repair the draft first.

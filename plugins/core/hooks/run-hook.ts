@@ -1,20 +1,10 @@
 #!/usr/bin/env bun
-import { realpathSync } from "node:fs";
-import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { containsPath, deny, hookRoot, localFile, readHookInput } from "../lib/hook-runtime";
+import { deny, hookRoot, localFile, readHookInput } from "../lib/hook-runtime";
 import { runBounded } from "../lib/bounded-command";
 import { isRecord } from "../lib/is-record";
 
 const HOOK_NAMES = new Set(["documentation-guidance", "nextjs-context", "format-after-edit"]);
-
-export function resolveHookPath(input: { dispatcherDir: string; name: string; projectDir?: string }): string | null {
-  if (!HOOK_NAMES.has(input.name)) return null;
-  try {
-    const root = realpathSync(join(input.dispatcherDir, ".."));
-    return localFile(root, `hooks/${input.name}.sh`, true);
-  } catch { return null; }
-}
 
 async function runGuard(root: string, classifier: string | undefined, payload: Record<string, unknown>) {
   if (typeof payload.tool_name !== "string" || !payload.tool_name || !isRecord(payload.tool_input)) throw new Error("Invalid tool input");
@@ -43,10 +33,11 @@ export async function runHook(name: string, args: string[] = []) {
       await runGuard(root, args[0], await readHookInput());
       return;
     }
-    if (!HOOK_NAMES.has(name) || args.length || !resolveHookPath({ dispatcherDir: join(root, "hooks"), name })) return;
+    if (!HOOK_NAMES.has(name) || args.length) return;
+    // localFile throws unless the file is a regular file inside the physical plugin root.
+    localFile(root, `hooks/${name}.sh`, true);
     if (name === "format-after-edit" && process.env.CORE_FORMAT_AFTER_EDIT !== "1") return;
     const implementation = localFile(root, `hooks/${name}.ts`);
-    if (!containsPath(root, implementation)) return;
     const payload = await readHookInput();
     const module = await import(pathToFileURL(implementation).href);
     await module.run(payload, root);

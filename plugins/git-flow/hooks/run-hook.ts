@@ -9,7 +9,7 @@ import { rejectGitOverrides } from "../lib/git-environment";
 
 const HOOK_NAMES = new Set(["repair-worktree-hooks", "worktree-budget"]);
 
-export function resolveHookPath(input: { dispatcherDir: string; name: string; projectDir?: string }): string | null {
+export function resolveHookPath(input: { dispatcherDir: string; name: string }): string | null {
   if (!HOOK_NAMES.has(input.name)) return null;
   try {
     const root = realpathSync(join(input.dispatcherDir, ".."));
